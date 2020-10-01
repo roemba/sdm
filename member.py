@@ -22,7 +22,7 @@ class Member:
 
     def _encrypt_data(self, raw_data: str):
         """
-        This is the method DatEnc(R, PK_s, SK_g[, I_R]) defined in the paper.
+        This is the method DatEnc(R[, PK_s, SK_g, I_R]) defined in the paper.
         :param raw_data:
         :return:
         """
@@ -30,17 +30,15 @@ class Member:
 
     def make_trapdoor(self, keywords: List[str], public_key, secret_key):
         """
-        This is the MakTrp(L', PK_s, SK_g) method defined in the paper.
+        This is the MakTrp(L'[, PK_s, SK_g]) method defined in the paper.
         Creates a Trapdoor of the keyword list that represents a query.
         :param keywords: Keyword list
-        :param public_key: Public key
-        :param secret_key: Secret key of the requester
         """
         pass
 
     def prepare_decryption_request(self, data_count: int) -> List[Tuple]:
         """
-        This is the DatAux(E(R), CT_i, PK_s) method defined in the paper.
+        This is the DatAux(E(R)[, CT_i, PK_s]) method defined in the paper.
         Generates a number (data_count) of different one-time key pairs (auxiliary information) to send to the
         Consultant for a number of decryption keys.
         :param data_count: Number of pairs to generate
