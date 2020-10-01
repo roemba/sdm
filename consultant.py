@@ -9,15 +9,19 @@ class Consultant:
     """
 
     def __init__(self):
+        self._public_key = None
+        self._secret_key = None
         self._master_key = None
 
     def setup_system(self, security_parameter):
         """
         This is the SysSet(tau) method defined in the paper.
-        Generates the public and secret key, and updates the consultant's master key
+        Generates the master, public and secret key, and updates the consultant's keys
         :param security_parameter: Security parameter tau
         :return: Public key and secret key respectively
         """
+        self._public_key = None
+        self._secret_key = None
         self._master_key = None
 
         return None, None
@@ -30,5 +34,15 @@ class Consultant:
         :return: List of certificates that each member should keep secret
         """
         return []
+
+    def request_decryption(self, certificate: Certificate, auxiliary_information):
+        """
+        This is the GDcKey(U', CT_i, PK_s, SK_g, MK) method defined in the paper.
+        The consultant verifies the certificate and returns a decryption key for the corresponding encrypted data.
+        :param certificate: Certificate
+        :param auxiliary_information: Auxiliary information to compute the key
+        :return: Decryption key for the corresponding encrypted data
+        """
+        return None
 
     # The methods MemJon (member joins) and MemLev (member leaves) are not essential.
