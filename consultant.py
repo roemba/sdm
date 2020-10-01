@@ -1,7 +1,7 @@
 from typing import List
 
 from certificates import Certificate
-from members.member import Member
+from member import Member
 
 
 class Consultant(Member):
@@ -43,6 +43,8 @@ class Consultant(Member):
         :param auxiliary_information: Auxiliary information to compute the key
         :return: Decryption key for the corresponding encrypted data
         """
+        assert certificate.verify(self._public_key)
+
         return None
 
     # The methods MemJon (member joins) and MemLev (member leaves) are not essential.

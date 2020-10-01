@@ -1,8 +1,8 @@
-# Methods defined in the paper
-## Certificate
+## Methods defined in the paper
+### Certificate
 - MemChk: `verify`
 
-## Member
+### Member
 - IndGen: `_build_index`
     - BuildIndex
 - DatEnc: `_encrypt_data`
@@ -11,13 +11,13 @@
 - MemDct
 - DatAux: `prepare_decryption_request`
 
-## Consultant (also a Member)
+### Consultant (also a Member)
 - SysSet: `setup_system`
 - GrpAut: `authenticate_group`
 - GDcKey (uses MemChk): `request_decryption_key`
 - ~~MemJon~~
 - ~~MemLev~~
 
-## StorageServer
+### StorageServer
 - SrhInd (uses MemChk): `search`
     - Test

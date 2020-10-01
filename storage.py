@@ -38,7 +38,8 @@ class StorageServer:
         :param trapdoor: Trapdoor representing the query keywords
         :return: List of encrypted data corresponding to the query keywords
         """
-        certificate.verify(self._public_key)
+        assert certificate.verify(self._public_key)
+        # TODO: Important! Make sure to only search through the items accessible to this client
 
         for data, index in self._storage:
             pass
