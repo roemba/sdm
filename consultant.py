@@ -35,16 +35,16 @@ class Consultant(Member):
         """
         return []
 
-    def request_decryption_key(self, certificate: Certificate, auxiliary_information):
+    def request_decryption_keys(self, certificate: Certificate, auxiliary_information: List) -> List:
         """
-        This is the GDcKey(U', CT_i, PK_s, SK_g, MK) method defined in the paper.
-        The consultant verifies the certificate and returns a decryption key for the corresponding encrypted data.
+        This is the GDcKey(U', CT_i[, PK_s, SK_g, MK]) method defined in the paper.
+        The consultant verifies the certificates and returns a decryption key for the corresponding encrypted data.
         :param certificate: Certificate
-        :param auxiliary_information: Auxiliary information to compute the key
-        :return: Decryption key for the corresponding encrypted data
+        :param auxiliary_information: Auxiliary information (U') to compute the key
+        :return: Decryption keys for the corresponding encrypted data
         """
         assert certificate.verify(self._public_key)
 
-        return None
+        return []
 
     # The methods MemJon (member joins) and MemLev (member leaves) are not essential.

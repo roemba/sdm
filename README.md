@@ -6,15 +6,15 @@
 - IndGen: `_build_index`
     - BuildIndex
 - DatEnc: `_encrypt_data`
-- MakTrp
+- MakTrp: `make_trapdoor`
     - Trapdoor
-- MemDct
 - DatAux: `prepare_decryption_request`
+- MemDct: `decrypt_data`
 
 ### Consultant (also a Member)
 - SysSet: `setup_system`
 - GrpAut: `authenticate_group`
-- GDcKey (uses MemChk): `request_decryption_key`
+- GDcKey (uses MemChk): `request_decryption_keys`
 - ~~MemJon~~
 - ~~MemLev~~
 

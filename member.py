@@ -1,3 +1,4 @@
+from typing import List, Tuple
 
 
 class Member:
@@ -27,5 +28,38 @@ class Member:
         """
         pass
 
-    def prepare_decryption_request(self):
+    def make_trapdoor(self, keywords: List[str], public_key, secret_key):
+        """
+        This is the MakTrp(L', PK_s, SK_g) method defined in the paper.
+        Creates a Trapdoor of the keyword list that represents a query.
+        :param keywords: Keyword list
+        :param public_key: Public key
+        :param secret_key: Secret key of the requester
+        """
         pass
+
+    def prepare_decryption_request(self, data_count: int) -> List[Tuple]:
+        """
+        This is the DatAux(E(R), CT_i, PK_s) method defined in the paper.
+        Generates a number (data_count) of different one-time key pairs (auxiliary information) to send to the
+        Consultant for a number of decryption keys.
+        :param data_count: Number of pairs to generate
+        :return: List of auxiliary information (U') and one-time secret keys (v)
+        """
+        pass
+
+    def decrypt_data(self, data: List, decryption_keys: List, one_time_keys: List) -> List[str]:
+        """
+        This is the MemDct(E(R), D[, PK_s, SK_g], v) method defined in the paper.
+        Decrypts a list of data items and returns the results (again as a list)
+        :param data: Encrypted data received from the StorageServer
+        :param decryption_keys: Decryption keys received from the Consultant
+        :param one_time_keys: One-time secret keys (v) generated in `prepare_decryption_request`
+        :return: List of decrypted (raw) data
+        """
+        results = []
+
+        for ciphertext, decryption_key, one_time_key in zip(data, decryption_keys, one_time_keys):
+            pass
+
+        return results
