@@ -1,16 +1,16 @@
 from typing import List
 
 from certificates import Certificate
+from members.member import Member
 
 
-class Consultant:
+class Consultant(Member):
     """
     This is the Group Manager (GM), who can access all information.
     """
 
     def __init__(self):
-        self._public_key = None
-        self._secret_key = None
+        super().__init__()
         self._master_key = None
 
     def setup_system(self, security_parameter):
@@ -35,7 +35,7 @@ class Consultant:
         """
         return []
 
-    def request_decryption(self, certificate: Certificate, auxiliary_information):
+    def request_decryption_key(self, certificate: Certificate, auxiliary_information):
         """
         This is the GDcKey(U', CT_i, PK_s, SK_g, MK) method defined in the paper.
         The consultant verifies the certificate and returns a decryption key for the corresponding encrypted data.

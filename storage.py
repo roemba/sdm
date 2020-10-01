@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 
 from certificates import Certificate
 
@@ -24,17 +24,21 @@ class StorageServer:
 
     def __init__(self):
         self._public_key = None
+        self._storage = None  # Collection of (data, index) tuples
 
-    def insert(self, certificate: Certificate, data: str):
+    def upload(self, certificate: Certificate, data: Tuple):
         pass
 
-    def search(self, certificate: Certificate, query: Query):
+    def search(self, certificate: Certificate, trapdoor):
         """
-        This is the SrhInd(T_L, I_R, PK_s) method defined in the paper.
+        This is the SrhInd(T_L, [I_R, ]PK_s) method defined in the paper.
         Validates the certificate and searches the index that is relevant to the requester.
         The consultant can search all indexes while the clients can only search their own.
         :param certificate: Certificate
-        :param query: Trapdoor representing the query
-        :return: List of encrypted data corresponding to the query
+        :param trapdoor: Trapdoor representing the query keywords
+        :return: List of encrypted data corresponding to the query keywords
         """
-        pass
+        certificate.verify(self._public_key)
+
+        for data, index in self._storage:
+            pass
