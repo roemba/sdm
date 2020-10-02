@@ -11,6 +11,10 @@ class Member:
         self._public_key = None
         self._secret_key = None
 
+    def assign_keys(self, public_key, secret_key):
+        self._public_key = public_key
+        self._secret_key = secret_key
+
     def build_data(self, raw_data: str):
         return self._encrypt_data(raw_data), self._build_index(raw_data)
 

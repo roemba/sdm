@@ -9,7 +9,7 @@ class StorageServer:
     """
 
     def __init__(self):
-        self._public_key = None
+        self.public_key = None
 
         # TODO: The storage should be adapted in such a way that we can easily extract only the relevant encrypted data
         self._storage = None  # Collection of (data, index) tuples
@@ -26,7 +26,7 @@ class StorageServer:
         :param trapdoor: Trapdoor representing the query keywords
         :return: List of encrypted data corresponding to the query keywords
         """
-        assert certificate.verify(self._public_key)
+        assert certificate.verify(self.public_key)
         # TODO: Important! Make sure to only search through the items accessible to this client
 
         results = []

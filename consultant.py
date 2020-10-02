@@ -26,6 +26,9 @@ class Consultant(Member):
 
         return None, None
 
+    # TODO: Either in the setup_system or authenticate_group methods the consultant should also generate a certificate
+    #  for themselves, perhaps with the convention that the consultant always has ID = 0.
+
     def authenticate_group(self, member_count: int) -> List[Certificate]:
         """
         This is the GrpAut(G, PK_s, MK) method defined in the paper.
