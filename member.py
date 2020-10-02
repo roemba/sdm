@@ -7,6 +7,7 @@ class Member:
     """
 
     def __init__(self):
+        self.certificate = None
         self._public_key = None
         self._secret_key = None
 
@@ -28,7 +29,7 @@ class Member:
         """
         pass
 
-    def make_trapdoor(self, keywords: List[str], public_key, secret_key):
+    def make_trapdoor(self, keywords: List[str]):
         """
         This is the MakTrp(L'[, PK_s, SK_g]) method defined in the paper.
         Creates a Trapdoor of the keyword list that represents a query.
