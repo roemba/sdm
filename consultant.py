@@ -3,6 +3,10 @@ from typing import List
 from certificates import Certificate
 from member import Member
 
+from bplib import bp
+from petlib.bn import Bn
+from copy import copy
+from hashlib import sha512
 
 class Consultant(Member):
     """
@@ -20,6 +24,42 @@ class Consultant(Member):
         :param security_parameter: Security parameter tau
         :return: Public key and secret key respectively
         """
+        # Step 1
+        BG = bp.BpGroup()
+        g = BG.gen1()
+        q = BG.order()
+
+        rand_values = []
+        while len(rand_values) != 3:
+            r = q.random()
+            if r > 1:
+                rand_values.append(r)
+
+        alpha, x, y = rand_values
+
+        X = g * x
+        Y = g * y
+        
+        # Step 2
+        H = lambda value_to_hash: Bn.from_binary(sha512(value_to_hash).digest()).mod(q)
+        # TODO
+
+        # Step 3
+        P = q.random() * g
+        Q = q.random() * q
+
+        rand_values = []
+        while len(rand_values) != 2:
+            r = q.random()
+            if r > 1:
+                rand_values.append(r)
+
+        lambda_, sigma = rand_values
+
+        P_dash = P * lambda_
+        Q_dash = Q * (lambda_ - sigma)
+
+        # Step 4
         self._public_key = None
         self._secret_key = None
         self._master_key = None
@@ -51,3 +91,7 @@ class Consultant(Member):
         return []
 
     # The methods MemJon (member joins) and MemLev (member leaves) are not essential.
+
+# Testing
+c = Consultant()
+c.setup_system(5)
