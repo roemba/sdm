@@ -1,4 +1,6 @@
+from hashlib import sha256
 from os import urandom
+from typing import List
 
 from petlib.bn import Bn
 from petlib.cipher import Cipher
@@ -12,6 +14,7 @@ class Client:
         """
         self._id = id
 
+        self._n = None
         self._e = None
         self._d = None
 
@@ -19,10 +22,14 @@ class Client:
     def id(self):
         return self._id
 
-    def assign_partial_key(self, partial_key: (Bn, Bn)):
+    def assign_keys(self, public_key: Bn, partial_key: (Bn, Bn)):
+        self._n = public_key
         self._e, self._d = partial_key
 
-    def encrypt_data(self, plaintext: bytes, search_keywords: bytes):
+    def _encrypt_RSA(self, plaintext: bytes) -> Bn:
+        return Bn.from_num(int.from_bytes(plaintext, byteorder='big')).mod_pow(self._e, self._n)
+
+    def encrypt_data(self, plaintext: bytes, search_keywords: List[bytes]) -> (Bn, Bn, List[Bn]):
         """
         input: plaintext to be encrypted and a set of searching keyword for that document
         output: success maybe?
@@ -46,7 +53,12 @@ class Client:
         c1 = enc.update(plaintext)
         c1 += enc.finalize()
 
-        # ...
+        # TODO: Check that the modulus n is at least 16 bytes long and large enough for the keywords to fit in
+        c2 = self._encrypt_RSA(key)
+
+        cw = [self._encrypt_RSA(sha256(kw).digest()) for kw in search_keywords]
+
+        return c1, c2, cw
 
     def data_decrypt(self, ciphertext):
         """

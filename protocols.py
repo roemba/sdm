@@ -14,7 +14,7 @@ def setup(consultant: Consultant, clients: List[Client], storage_server: Storage
     for client in clients:
         # Add client
         client_pair, storage_pair = consultant.generate_user_key()
-        client.assign_partial_key(client_pair)
+        client.assign_keys(public_key, client_pair)
         storage_server.new_user_partial_key(client.id, storage_pair)
 
 
