@@ -1,3 +1,6 @@
+from math import gcd
+from typing import List, Tuple
+
 from petlib.bn import Bn
 
 
@@ -7,10 +10,13 @@ class TTP:
     """
 
     def __init__(self):
+        self._n = None
         self._phi_n = None
+
+        self._e = None
         self._d = None
 
-    def setup_key_generator(self, k):
+    def setup_key_generator(self, k) -> None:
         """
         input: k is a security parameter
         output: n (master key)
@@ -19,16 +25,37 @@ class TTP:
         p = Bn.get_prime(k)
         q = Bn.get_prime(k)
 
-        # TODO: We might be able to use Carmichael's totient function here instead
-        n = p * q
+        self._n = p * q
         self._phi_n = (p - 1) * (q - 1)
 
-        e = Bn.from_num(65537)
-        self._d = e.mod_inverse(self._phi_n)
+        self._e = Bn.from_num(65537)
+        self._d = self._e.mod_inverse(self._phi_n)
 
-        public_key = (e, n)
+    def _split_multiplicatively(self, secret: Bn, share_count: int):
+        shares = []
+        product = Bn.from_num(1)
 
-    def user_key_generator(self):
+        # The first shares can be random coprimes
+        for i in range(share_count - 1):
+            # Generate a random coprime to phi_n
+            while True:
+                # Generate a non-zero number below phi_n
+                number = (self._phi_n - 1).random() + 1
+
+                if gcd(number, self._phi_n) == 1:
+                    break
+
+            shares.append(number)
+            product = product.mod_mul(number, self._phi_n)
+
+        # The final share x must make sure the product of all shares equals the secret
+        # s_0 * ... * s_{i-1} * x = secret => x = secret * inv(s_0 * ... * s_{i-1})
+        final_share = secret.mod_mul(product.mod_inverse(self._phi_n), self._phi_n)
+        shares.append(final_share)
+
+        return shares
+
+    def user_key_generator(self, user_count) -> List[Tuple[Bn, Bn]]:
         """
         input: (n) master key
         output: User key pair (e_i1,, d_i1) for each user. 
@@ -37,7 +64,10 @@ class TTP:
         in chapter 3.1 of "Shared and Searchable encrypted Data for Untrused Servers" by
         Changyu Dong, Giovanni Russello and Naranker Dulay. 
         """
+        e_shares = self._split_multiplicatively(self._e, user_count)
+        d_shares = self._split_multiplicatively(self._d, user_count)
 
+        return [(e, d) for e, d in zip(e_shares, d_shares)]
 
     def define_hash(self):
         """
