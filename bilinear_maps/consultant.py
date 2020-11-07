@@ -27,6 +27,7 @@ class Consultant(Member):
         # Step 1
         BG = bp.BpGroup()
         g = BG.gen1()
+
         q = BG.order()
 
         rand_values = []
@@ -39,7 +40,7 @@ class Consultant(Member):
 
         X = g * x
         Y = g * y
-        
+
         # Step 2
         H = lambda value_to_hash: Bn.from_binary(sha512(value_to_hash).digest()).mod(q)
         # TODO

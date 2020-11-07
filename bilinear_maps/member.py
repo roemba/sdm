@@ -18,14 +18,15 @@ class Member:
     def build_data(self, raw_data: str):
         return self._encrypt_data(raw_data), self._build_index(raw_data)
 
-    def _build_index(self, raw_data: str):
+    def _build_index(self, raw_data: str): #Ásta
+
         """
         This is the method IndGen(R, PK_s, SK_g) defined in the paper.
         :param data:
         :return:
         """
 
-    def _encrypt_data(self, raw_data: str):
+    def _encrypt_data(self, raw_data: str): #Ásta
         """
         This is the method DatEnc(R[, PK_s, SK_g, I_R]) defined in the paper.
         :param raw_data:
@@ -33,7 +34,7 @@ class Member:
         """
         pass
 
-    def make_trapdoor(self, keywords: List[str]):
+    def make_trapdoor(self, keywords: List[str]): #Ásta
         """
         This is the MakTrp(L'[, PK_s, SK_g]) method defined in the paper.
         Creates a Trapdoor of the keyword list that represents a query.
@@ -41,7 +42,7 @@ class Member:
         """
         pass
 
-    def prepare_decryption_request(self, data_count: int) -> List[Tuple]:
+    def prepare_decryption_request(self, data_count: int) -> List[Tuple]: #Vasanth
         """
         This is the DatAux(E(R)[, CT_i, PK_s]) method defined in the paper.
         Generates a number (data_count) of different one-time key pairs (auxiliary information) to send to the
@@ -51,7 +52,7 @@ class Member:
         """
         pass
 
-    def decrypt_data(self, data: List, decryption_keys: List, one_time_keys: List) -> List[str]:
+    def decrypt_data(self, data: List, decryption_keys: List, one_time_keys: List) -> List[str]: #Vasanth
         """
         This is the MemDct(E(R), D[, PK_s, SK_g], v) method defined in the paper.
         Decrypts a list of data items and returns the results (again as a list)
