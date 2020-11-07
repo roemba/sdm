@@ -16,20 +16,23 @@ class Consultant:
         self._e = None
         self._d = None
 
-    def setup_key_generator(self, k) -> None:
+    def setup_system(self, k) -> Bn:
         """
         input: k is a security parameter
-        output: n (master key)
+        output: n
         k is used to generate (p, q, n, totient(n), e, d)
         """
-        p = Bn.get_prime(k)
-        q = Bn.get_prime(k)
+        p = Bn.get_prime(k // 2)
+        q = Bn.get_prime(k // 2)
 
         self._n = p * q
         self._phi_n = (p - 1) * (q - 1)
 
+        # TODO: Maybe e needs to be random
         self._e = Bn.from_num(65537)
         self._d = self._e.mod_inverse(self._phi_n)
+
+        return self._n
 
     def _split_multiplicatively(self, secret: Bn, share_count: int):
         shares = []
