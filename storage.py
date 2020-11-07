@@ -1,3 +1,8 @@
+from typing import Dict
+
+from petlib.bn import Bn
+
+
 class StorageServer:
 
     def __init__(self):
@@ -5,6 +10,8 @@ class StorageServer:
         Server needs a storage for all e_i2 and d_i2 for every user in the system
         Needs a storage
         """
+        # Storage of the partial keys corresponding to each client_id
+        self._partial_keys: Dict[Bn, (Bn, Bn)] = {}
 
     def new_user(self, user_values):
         """

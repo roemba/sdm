@@ -16,9 +16,6 @@ class Consultant:
         self._e = None
         self._d = None
 
-        # Storage of the partial keys corresponding to each client_id
-        self._partial_keys: Dict[Bn, (Bn, Bn)] = {}
-
     def setup_system(self, k) -> Bn:
         """
         input: k is a security parameter
@@ -52,7 +49,7 @@ class Consultant:
 
         return first_share, final_share
 
-    def generate_user_key(self, client_id: Bn) -> (Bn, Bn):
+    def generate_user_key(self) -> ((Bn, Bn), (Bn, Bn)):
         """
         input: (n) master key
         output: User key pair (e_i1,, d_i1) for each user. 
@@ -64,10 +61,7 @@ class Consultant:
         e1, e2 = self._split_multiplicatively(self._e)
         d1, d2 = self._split_multiplicatively(self._d)
 
-        # TODO: Check that client does not yet exist
-        self._partial_keys[client_id] = (e2, d2)
-
-        return e1, d1
+        return (e1, d1), (e2, d2)
 
     def define_hash(self):
         """

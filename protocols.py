@@ -10,10 +10,12 @@ def setup(consultant: Consultant, clients: List[Client], storage_server: Storage
     public_key = consultant.setup_system(128)
     storage_server.public_key = public_key
 
-#     # Setup the system for the clients
-#     for member, certificate in zip(members, consultant.authenticate_group(len(members))):
-#         member.certificate = certificate
-#         member.assign_keys(public_key, secret_key)
+    # Setup the system for the clients
+    #for member, certificate in zip(members, consultant.authenticate_group(len(members))):
+    for client in clients:
+        user_pair, storage_pair = consultant.generate_user_key()
+        # member.certificate = certificate
+        # member.assign_keys(public_key, secret_key)
 
 
 # def search_storage_server(consultant: Consultant, member: Member, storage_server: StorageServer, keywords: List[str])\
