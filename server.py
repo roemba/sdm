@@ -1,4 +1,4 @@
-class Server():
+class StorageServer:
 
     def __init__(self):
         """

@@ -4,9 +4,9 @@ from typing import List, Tuple
 from petlib.bn import Bn
 
 
-class TTP:
+class Consultant:
     """
-    This is the trusted third party in the protocol. Setting up and managing all the keys
+    This is the trusted party (consultant) in the protocol, setting up and managing all the keys.
     """
 
     def __init__(self):
