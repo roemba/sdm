@@ -1,5 +1,5 @@
 from math import gcd
-from typing import List, Tuple
+from typing import Dict
 
 from petlib.bn import Bn
 
@@ -15,6 +15,9 @@ class Consultant:
 
         self._e = None
         self._d = None
+
+        # Storage of the partial keys corresponding to each client_id
+        self._partial_keys: Dict[Bn, (Bn, Bn)] = {}
 
     def setup_system(self, k) -> Bn:
         """
@@ -34,31 +37,22 @@ class Consultant:
 
         return self._n
 
-    def _split_multiplicatively(self, secret: Bn, share_count: int):
-        shares = []
-        product = Bn.from_num(1)
+    def _split_multiplicatively(self, secret: Bn) -> (Bn, Bn):
+        # The first share can be a random coprime to phi_n
+        while True:
+            # Generate a non-zero number below phi_n
+            first_share = (self._phi_n - 1).random() + 1
 
-        # The first shares can be random coprimes
-        for i in range(share_count - 1):
-            # Generate a random coprime to phi_n
-            while True:
-                # Generate a non-zero number below phi_n
-                number = (self._phi_n - 1).random() + 1
+            if gcd(first_share, self._phi_n) == 1:
+                break
 
-                if gcd(number, self._phi_n) == 1:
-                    break
+        # The final share x must multiply with the first share s to equal the secret
+        # s * x = secret => x = secret * s
+        final_share = secret.mod_mul(first_share.mod_inverse(self._phi_n), self._phi_n)
 
-            shares.append(number)
-            product = product.mod_mul(number, self._phi_n)
+        return first_share, final_share
 
-        # The final share x must make sure the product of all shares equals the secret
-        # s_0 * ... * s_{i-1} * x = secret => x = secret * inv(s_0 * ... * s_{i-1})
-        final_share = secret.mod_mul(product.mod_inverse(self._phi_n), self._phi_n)
-        shares.append(final_share)
-
-        return shares
-
-    def user_key_generator(self, user_count) -> List[Tuple[Bn, Bn]]:
+    def generate_user_key(self, client_id: Bn) -> (Bn, Bn):
         """
         input: (n) master key
         output: User key pair (e_i1,, d_i1) for each user. 
@@ -67,10 +61,13 @@ class Consultant:
         in chapter 3.1 of "Shared and Searchable encrypted Data for Untrused Servers" by
         Changyu Dong, Giovanni Russello and Naranker Dulay. 
         """
-        e_shares = self._split_multiplicatively(self._e, user_count)
-        d_shares = self._split_multiplicatively(self._d, user_count)
+        e1, e2 = self._split_multiplicatively(self._e)
+        d1, d2 = self._split_multiplicatively(self._d)
 
-        return [(e, d) for e, d in zip(e_shares, d_shares)]
+        # TODO: Check that client does not yet exist
+        self._partial_keys[client_id] = (e2, d2)
+
+        return e1, d1
 
     def define_hash(self):
         """
