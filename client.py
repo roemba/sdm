@@ -1,4 +1,7 @@
+from os import urandom
+
 from petlib.bn import Bn
+from petlib.cipher import Cipher
 
 
 class Client:
@@ -19,7 +22,7 @@ class Client:
     def assign_partial_key(self, partial_key: (Bn, Bn)):
         self._e, self._d = partial_key
 
-    def data_encryption(self, plaintext, search_keywords):
+    def encrypt_data(self, plaintext: bytes, search_keywords: bytes):
         """
         input: plaintext to be encrypted and a set of searching keyword for that document
         output: success maybe?
@@ -33,6 +36,17 @@ class Client:
         The user computes a hash value for each search keyword w_m and sigma_wm = H(W_m)
         c_wm = (sigma_wm)^e_i1 hash encrypted under RSA encryption and sends to the server
         """
+        # Select a one-time random key and IV for AES-128-CTR
+        aes = Cipher("AES-128-CTR")
+        key = urandom(16)
+        iv = urandom(16)
+
+        # Encrypt the data
+        enc = aes.enc(key, iv)
+        c1 = enc.update(plaintext)
+        c1 += enc.finalize()
+
+        # ...
 
     def data_decrypt(self, ciphertext):
         """
