@@ -1,9 +1,23 @@
+from petlib.bn import Bn
+
+
 class Client:
 
-    def __init__(self):
+    def __init__(self, id: Bn):
         """
         Should call user key setup to create a key pair of the user
         """
+        self._id = id
+
+        self._e = None
+        self._d = None
+
+    @property
+    def id(self):
+        return self._id
+
+    def assign_partial_key(self, partial_key: (Bn, Bn)):
+        self._e, self._d = partial_key
 
     def data_encryption(self, plaintext, search_keywords):
         """

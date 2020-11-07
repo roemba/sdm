@@ -13,11 +13,13 @@ class StorageServer:
         # Storage of the partial keys corresponding to each client_id
         self._partial_keys: Dict[Bn, (Bn, Bn)] = {}
 
-    def new_user(self, user_values):
+    def new_user_partial_key(self, client_id: Bn, partial_key: (Bn, Bn)):
         """
         input: user_values is a tuple for this users (e_i2, d_i2). To add to the server proxy storage
         output: success or failure maybe?
         """
+        # TODO: Check that client does not yet exist
+        self._partial_keys[client_id] = partial_key
     
     def proxy_encryption(self, ciphertext):
         """
