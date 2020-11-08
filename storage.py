@@ -1,6 +1,26 @@
-from typing import Dict
+from typing import Dict, List, Tuple
 
 from petlib.bn import Bn
+
+
+class EncryptedDocument:
+
+    def __init__(self, keywords: List[Bn], ciphertext_pair: (Bn, Bn)):
+        self._keywords = set(keywords)
+        self._ciphertext_pair = ciphertext_pair
+
+    def __contains__(self, keyword: Bn):
+        """
+        Checks whether a keyword occurs in this EncryptedDocument.
+
+        :param keyword: Keyword to search for (trapdoor)
+        :return: True when the keyword is contained in this EncryptedDocument
+        """
+        return keyword in self._keywords
+
+    @property
+    def ciphertext_pair(self):
+        return self._ciphertext_pair
 
 
 class StorageServer:
@@ -12,8 +32,12 @@ class StorageServer:
         """
         # Storage of the partial keys corresponding to each client_id
         self._partial_keys: Dict[Bn, (Bn, Bn)] = {}
+
         self._n = None
         self.public_key = None
+
+        # Storage of encrypted documents, it is a collection of encrypted documents
+        self._storage: List[EncryptedDocument] = []
 
     def _encrypt_RSA(self, current_e, encryption_text: Bn) -> Bn:
         return encryption_text.mod_pow(current_e, self.public_key)
@@ -42,12 +66,12 @@ class StorageServer:
         client_e, client_d = self._partial_keys[client_id]
 
         c2_starred = self._encrypt_RSA(c2, client_e)
-        cw_starred = [self._encrypt_RSA(cwm) for cwm in cw]
+        cw_starred = [self._encrypt_RSA(cwm, client_e) for cwm in cw]
 
         #TODO we need a storing method for the ciphertext below
         ciphertext =  (c1, c2_starred, cw_starred)
 
-    def proxy_decryption(self, client_id, ciphertext_pairs):
+    def proxy_decryption(self, client_id, ciphertext_pairs: List[Tuple[Bn, Bn]]) -> List[Tuple[Bn, Bn]]:
         """
         input: id of current client, all ciphertext pairs (c1, c2*) which matched a keyword
         output: ciphertext pair (c1, c2') where c2' = (c2*)^d_i2 for user i
@@ -56,18 +80,27 @@ class StorageServer:
         """
         if len(ciphertext_pairs) == 0:
             raise ValueError("No matches for keyword were found")
-        else:
-            client_e, client_d = self._partial_keys[client_id]
-            ciphertext_pairs_marked = []
 
-            for ciphertext_pair in ciphertext_pairs:
-                c2_marked = self._decrypt_RSA(client_d, ciphertext_pair[1])
-                ciphertext_pairs_marked.append((ciphertext_pairs[0], c2_marked))
+        client_e, client_d = self._partial_keys[client_id]
+        ciphertext_pairs_marked = []
+
+        for ciphertext_pair in ciphertext_pairs:
+            c2_marked = self._decrypt_RSA(client_d, ciphertext_pair[1])
+            ciphertext_pairs_marked.append((ciphertext_pairs[0], c2_marked))
 
         return ciphertext_pairs_marked
-        
 
-    def proxy_keyword_search(self, client_id, q):
+    def upload_encrypted_document(self, client_id: Bn, ciphertexts: (Bn, Bn, List[Bn])):
+        client_e, client_d = self._partial_keys[client_id]
+
+        c1, c2, cws = ciphertexts
+
+        c2_star = self._encrypt_RSA(client_e, c2)
+        cws_star = [self._encrypt_RSA(client_e, cw) for cw in cws]
+
+        self._storage.append(EncryptedDocument(cws_star, (c1, c2_star)))
+
+    def proxy_keyword_search(self, client_id: Bn, trapdoor_q: Bn):
         """
         input: Q, encrypted hash value of keyword
         output: all ciphertext pairs (c1, c2') which contain keyword
@@ -76,6 +109,8 @@ class StorageServer:
         then add ciphertext into the result set.
         """
         client_e, client_d = self._partial_keys[client_id]
-        q_starred = self._encrypt_RSA(q, client_e)
+        q_starred = self._encrypt_RSA(trapdoor_q, client_e)
 
-        #TODO go through all stored ciphertext pairs and add (c1, c2* to tuple)
+        results = [document.ciphertext_pair for document in self._storage if q_starred in document]
+
+        return self.proxy_decryption(client_id, results)

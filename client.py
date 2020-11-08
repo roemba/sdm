@@ -90,13 +90,12 @@ class Client:
 
         return documents
 
-    def user_keyword_search(self, keyword):
+    def create_trapdoor_q(self, keyword: bytes):
         """
-        intput: keyword the user wants to search for
-        output: Encrypted documents which containt the keyword
+        input: keyword the user wants to search for
+        output: Trapdoor for the server to find encrypted documents which contain the keyword
 
-        user computes the Hash of the keyword sigma = H(W) an encryptes Q = sigma^{e_j2}. User sends Q to server
+        User computes the hash of the keyword sigma = H(W) an encrypts Q = sigma^{e_j2}. User sends Q to server
         """
 
         return self._encrypt_RSA(sha256(keyword).digest())
-
