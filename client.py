@@ -17,6 +17,7 @@ class Client:
         self._n = None
         self._e = None
         self._d = None
+        self._iv = None
 
     @property
     def id(self):
@@ -27,7 +28,15 @@ class Client:
         self._e, self._d = partial_key
 
     def _encrypt_RSA(self, plaintext: bytes) -> Bn:
-        return Bn.from_num(int.from_bytes(plaintext, byteorder='big')).mod_pow(self._e, self._n)
+        #Already converts using big endian, I think it is unnecessary to convert first to number. 
+        return Bn.from_binary(plaintext).mod_pow(self._e, self._n)
+        #return Bn.from_num(int.from_bytes(plaintext, byteorder='big')).mod_pow(self._e, self._n)
+        
+    def _decrypt_RSA(self, ciphertext: Bn) -> bytes:
+        return ciphertext.mod_pow(self._d, self._n).binary()
+
+    def set_seed(self, iv):
+        self._iv = iv
 
     def encrypt_data(self, plaintext: bytes, search_keywords: List[bytes]) -> (Bn, Bn, List[Bn]):
         """
@@ -46,10 +55,9 @@ class Client:
         # Select a one-time random key and IV for AES-128-CTR
         aes = Cipher("AES-128-CTR")
         key = urandom(16)
-        iv = urandom(16)
 
         # Encrypt the data
-        enc = aes.enc(key, iv)
+        enc = aes.enc(key, self._iv)
         c1 = enc.update(plaintext)
         c1 += enc.finalize()
 
@@ -60,15 +68,27 @@ class Client:
 
         return c1, c2, cw
 
-    def data_decrypt(self, ciphertext):
+    def data_decrypt(self, ciphertext_pairs):
         """
         input is the ciphertext extracted from the server for every plaintext item 
               after proxy re-decryption c_1, c_2'
-        output: plaintext
+        output: plaintexts which match a search string
 
         User computs (c_2')^d_i1 ) = (K_x)^{ed} = K_x. Using K_x the user can decrypt the document
         plaintext = {E_{k_x}}^-1(c_1) (because encryption is symmetric so it needs to have an inverse function)
         """
+
+        documents = []
+        aes = Cipher("AES-128-CTR")
+
+        for ciphertext_pair in ciphertext_pairs:
+            c2 = self._decrypt_RSA(ciphertext_pair[1])
+            decryption = aes.dec(c2, self._iv)
+            plaintext = decryption.update(ciphertext_pair[0])
+            plaintext += decryption.finalize()
+            documents.append(plaintext)
+
+        return documents
 
     def user_keyword_search(self, keyword):
         """
@@ -77,3 +97,6 @@ class Client:
 
         user computes the Hash of the keyword sigma = H(W) an encryptes Q = sigma^{e_j2}. User sends Q to server
         """
+
+        return self._encrypt_RSA(sha256(keyword).digest())
+

@@ -7,7 +7,7 @@ from storage import StorageServer
 
 def setup(consultant: Consultant, clients: List[Client], storage_server: StorageServer):
     # Setup the system for the consultant and storage_server
-    public_key = consultant.setup_system(128)
+    public_key, iv = consultant.setup_system(128)
     storage_server.public_key = public_key
 
     # Setup the system for the clients
@@ -15,6 +15,7 @@ def setup(consultant: Consultant, clients: List[Client], storage_server: Storage
         # Add client
         client_pair, storage_pair = consultant.generate_user_key()
         client.assign_keys(public_key, client_pair)
+        client.set_seed(iv)
         storage_server.new_user_partial_key(client.id, storage_pair)
 
 

@@ -1,5 +1,6 @@
 from math import gcd
 from typing import Dict
+from os import urandom
 
 from petlib.bn import Bn
 
@@ -32,7 +33,9 @@ class Consultant:
         self._e = Bn.from_num(65537)
         self._d = self._e.mod_inverse(self._phi_n)
 
-        return self._n
+        iv  = urandom(16)
+
+        return self._n, iv
 
     def _split_multiplicatively(self, secret: Bn) -> (Bn, Bn):
         # The first share can be a random coprime to phi_n
@@ -62,8 +65,3 @@ class Consultant:
         d1, d2 = self._split_multiplicatively(self._d)
 
         return (e1, d1), (e2, d2)
-
-    def define_hash(self):
-        """
-        For this to work all users have to use the same hash function
-        """
