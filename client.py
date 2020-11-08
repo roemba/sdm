@@ -1,6 +1,6 @@
 from hashlib import sha256
 from os import urandom
-from typing import List
+from typing import List, Tuple
 
 from petlib.bn import Bn
 from petlib.cipher import Cipher
@@ -68,7 +68,7 @@ class Client:
 
         return c1, c2, cw
 
-    def data_decrypt(self, ciphertext_pairs):
+    def data_decrypt(self, ciphertext_pairs: List[Tuple[bytes, Bn]]) -> List[bytes]:
         """
         input is the ciphertext extracted from the server for every plaintext item 
               after proxy re-decryption c_1, c_2'

@@ -27,8 +27,8 @@ def search_storage_server(client: Client, storage_server: StorageServer, keyword
     trapdoor = client.create_trapdoor_q(bytes(keyword, encoding='utf-8'))
     encrypted_results = storage_server.proxy_keyword_search(client.id, trapdoor)
 
-    # Decrypt search results
-    return client.data_decrypt(encrypted_results)
+    # Decrypt search results (and go from bytes to strings)
+    return [byte_result.decode() for byte_result in client.data_decrypt(encrypted_results)]
 
 
 # def search_storage_server_consultant(consultant: Consultant, storage_server: StorageServer, keywords: List[str])\
@@ -62,6 +62,9 @@ if __name__ == '__main__':
     setup(my_consultant, my_clients, my_server)
 
     upload_storage_server(my_clients[0], my_server, doc)
+    print(type(my_server._storage[0].ciphertext_pair[1]))
+    print(my_clients[0].data_decrypt([my_server._storage[0].ciphertext_pair]))
+    print(my_clients[0].data_decrypt([my_server._storage[0].ciphertext_pair])[0].decode('utf-8'))
 
     results = search_storage_server(my_clients[0], my_server, "my")
     print(results)

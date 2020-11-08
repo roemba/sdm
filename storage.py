@@ -5,7 +5,7 @@ from petlib.bn import Bn
 
 class EncryptedDocument:
 
-    def __init__(self, keywords: List[Bn], ciphertext_pair: (Bn, Bn)):
+    def __init__(self, keywords: List[Bn], ciphertext_pair: Tuple[bytes, Bn]):
         self._keywords = set(keywords)
         self._ciphertext_pair = ciphertext_pair
 
@@ -45,7 +45,7 @@ class StorageServer:
     def _decrypt_RSA(self, current_d, ciphertext: Bn) -> Bn:
         return ciphertext.mod_pow(current_d, self.public_key)
 
-    def new_user_partial_key(self, client_id: Bn, partial_key: (Bn, Bn)):
+    def new_user_partial_key(self, client_id: Bn, partial_key: Tuple[Bn, Bn]):
         """
         input: user_values is a tuple for this users (e_i2, d_i2). To add to the server proxy storage
         output: success or failure maybe?
@@ -71,7 +71,7 @@ class StorageServer:
         #TODO we need a storing method for the ciphertext below
         ciphertext =  (c1, c2_starred, cw_starred)
 
-    def proxy_decryption(self, client_id, ciphertext_pairs: List[Tuple[Bn, Bn]]) -> List[Tuple[Bn, Bn]]:
+    def proxy_decryption(self, client_id, ciphertext_pairs: List[Tuple[bytes, Bn]]) -> List[Tuple[bytes, Bn]]:
         """
         input: id of current client, all ciphertext pairs (c1, c2*) which matched a keyword
         output: ciphertext pair (c1, c2') where c2' = (c2*)^d_i2 for user i
@@ -90,7 +90,7 @@ class StorageServer:
 
         return ciphertext_pairs_marked
 
-    def upload_encrypted_document(self, client_id: Bn, ciphertexts: (Bn, Bn, List[Bn])):
+    def upload_encrypted_document(self, client_id: Bn, ciphertexts: Tuple[bytes, Bn, List[Bn]]):
         client_e, client_d = self._partial_keys[client_id]
 
         c1, c2, cws = ciphertexts
