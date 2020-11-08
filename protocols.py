@@ -61,10 +61,18 @@ if __name__ == '__main__':
 
     setup(my_consultant, my_clients, my_server)
 
+    # TODO: Jelle to Vasanth
+    # So the code here just sets up one client, one storage server and one consultant and I am trying to
+    # upload a document and then to decrypt it with the same client. Right now this code is *super* messy as I just
+    # wanted to check if it was working (and it doesn't seem to work). Could you have a look if you can get this
+    # working? If it gets too frustrating we can discuss with the group haha.
+    # Right now searching also does not seem to be working. I was trying to find documents containing "my" but it
+    # does not manage to find any results (or so it seems).
+
     upload_storage_server(my_clients[0], my_server, doc)
     print(type(my_server._storage[0].ciphertext_pair[1]))
     print(my_clients[0].data_decrypt([my_server._storage[0].ciphertext_pair]))
-    print(my_clients[0].data_decrypt([my_server._storage[0].ciphertext_pair])[0].decode('utf-8'))
+    print(my_clients[0].data_decrypt([my_server.proxy_decryption(my_clients[0].id, [my_server._storage[0].ciphertext_pair])[0]])[0].decode('utf-8'))
 
     results = search_storage_server(my_clients[0], my_server, "my")
     print(results)
