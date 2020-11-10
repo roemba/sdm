@@ -86,7 +86,7 @@ class StorageServer:
 
         for ciphertext_pair in ciphertext_pairs:
             c2_marked = self._decrypt_RSA(client_d, ciphertext_pair[1])
-            ciphertext_pairs_marked.append((ciphertext_pairs[0], c2_marked))
+            ciphertext_pairs_marked.append((ciphertext_pairs[0], c2_marked)) ## should be pair?
 
         return ciphertext_pairs_marked
 
@@ -110,7 +110,7 @@ class StorageServer:
         """
         client_e, client_d = self._partial_keys[client_id]
         q_starred = self._encrypt_RSA(trapdoor_q, client_e)
-
+        print('q_starred: ', q_starred)
         results = [document.ciphertext_pair for document in self._storage if q_starred in document]
 
         return self.proxy_decryption(client_id, results)

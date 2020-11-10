@@ -19,6 +19,7 @@ class Client:
         self._d = None
         self._iv = None
 
+
     @property
     def id(self):
         return self._id
@@ -31,8 +32,9 @@ class Client:
         #Already converts using big endian, I think it is unnecessary to convert first to number. 
         return Bn.from_binary(plaintext).mod_pow(self._e, self._n)
         #return Bn.from_num(int.from_bytes(plaintext, byteorder='big')).mod_pow(self._e, self._n)
-        
+
     def _decrypt_RSA(self, ciphertext: Bn) -> bytes:
+        print('decrpt rsa', ciphertext.mod_pow(self._d, self._n), type(ciphertext.mod_pow(self._d, self._n)))
         return ciphertext.mod_pow(self._d, self._n).binary()
 
     def set_seed(self, iv):
@@ -55,17 +57,22 @@ class Client:
         # Select a one-time random key and IV for AES-128-CTR
         aes = Cipher("AES-128-CTR")
         key = urandom(16)
-
+        print('key', type(key), key)
         # Encrypt the data
         enc = aes.enc(key, self._iv)
         c1 = enc.update(plaintext)
         c1 += enc.finalize()
-
+        dec = aes.dec(key, self._iv)
+        self.tempyy = c1
+        c1_dec = dec.update(c1)
+        c1_dec += dec.finalize()
+        print('pt: ', plaintext, ' c1: ', c1, ' c1_dec: ', c1_dec)
         # TODO: Check that the modulus n is at least 16 bytes long and large enough for the keywords to fit in
         c2 = self._encrypt_RSA(key)
 
         cw = [self._encrypt_RSA(sha256(kw).digest()) for kw in search_keywords]
 
+        print("after user encryption: c1", c1, type(c1), " c2,", c2, "cw ", cw)
         return c1, c2, cw
 
     def data_decrypt(self, ciphertext_pairs: List[Tuple[bytes, Bn]]) -> List[bytes]:
@@ -83,8 +90,12 @@ class Client:
 
         for ciphertext_pair in ciphertext_pairs:
             c2 = self._decrypt_RSA(ciphertext_pair[1])
+            print('user data decrypt: key ', c2, type(c2))
             decryption = aes.dec(c2, self._iv)
-            plaintext = decryption.update(ciphertext_pair[0])
+            print('user ciphertext_pair: before decryption', ciphertext_pair[0], type(ciphertext_pair[0]))
+            print('equality check: ', ciphertext_pair[0][0]==self.tempyy)
+            print('ct: ', ciphertext_pair[0][0], ' c1: ', self.tempyy)
+            plaintext = decryption.update(ciphertext_pair[0][0])
             plaintext += decryption.finalize()
             documents.append(plaintext)
 

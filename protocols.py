@@ -25,6 +25,7 @@ def setup(consultant: Consultant, clients: List[Client], storage_server: Storage
 def search_storage_server(client: Client, storage_server: StorageServer, keyword: str) -> List[str]:
     # Request search from the server
     trapdoor = client.create_trapdoor_q(bytes(keyword, encoding='utf-8'))
+    print('trapdoor: ', trapdoor)
     encrypted_results = storage_server.proxy_keyword_search(client.id, trapdoor)
 
     # Decrypt search results (and go from bytes to strings)
@@ -47,7 +48,6 @@ def upload_storage_server(client: Client, storage_server: StorageServer, documen
     # Encrypt the document
     keywords = [bytes(keyword, encoding='utf-8') for keyword in document.split()]
     ciphertexts = client.encrypt_data(bytes(document, encoding='utf-8'), keywords)
-
     # Upload to the storage server
     storage_server.upload_encrypted_document(client.id, ciphertexts)
 
@@ -70,8 +70,20 @@ if __name__ == '__main__':
     # does not manage to find any results (or so it seems).
 
     upload_storage_server(my_clients[0], my_server, doc)
-    print(type(my_server._storage[0].ciphertext_pair[1]))
-    print(my_clients[0].data_decrypt([my_server._storage[0].ciphertext_pair]))
+    # has to now be decrypted by proxy server and then the user
+    print('after insertion: ciphertext pair', my_server._storage[0].ciphertext_pair)
+    decrypt_proxy = my_server.proxy_decryption(my_clients[0].id, [my_server._storage[0].ciphertext_pair])
+    print('after proxy decryption: ', decrypt_proxy)
+    decrypt_user = my_clients[0].data_decrypt(decrypt_proxy)
+    print('after user decryption: ', decrypt_user)
+    print(decrypt_user[0].decode('utf-8'))
+    #decrypt_doc = my_clients[0].data_decrypt([my_server._storage[0].ciphertext_pair])
+
+
+
+    #print(decrypt_doc, decrypt_doc[0])
+    #print(type(my_server._storage[0].ciphertext_pair[1]))
+
     print(my_clients[0].data_decrypt([my_server.proxy_decryption(my_clients[0].id, [my_server._storage[0].ciphertext_pair])[0]])[0].decode('utf-8'))
 
     results = search_storage_server(my_clients[0], my_server, "my")
