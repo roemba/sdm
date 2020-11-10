@@ -72,6 +72,15 @@ if __name__ == '__main__':
     decrypt_user = my_clients[0].data_decrypt(decrypt_proxy)
     for i, v in enumerate(docs):
         print(f'doc{i}:', my_server._storage[i]._ciphertext_pair, my_server._storage[i]._keywords)
+
+
+    # A user is able to add and decrypt their own document. Searching is fine when there is only document returned
+    # but when there are multiple docs being returned, it leads to nonsensical decryptions when printing the results
+    # even though the keyword matches correctly. encoding method had to be changed to "ISO-8859-1" for the results to
+    # be returned otherwise it fails
+    #
+    # searching for Hello should return two documents correctly decrypted but only the first one seems fine.
+    # re-run the file if you get any errors - i get multiple outputs
     print(decrypt_user[0].decode('utf-8'))
     print(my_clients[0].data_decrypt([my_server.proxy_decryption(my_clients[0].id, [my_server._storage[0].ciphertext_pair])[0]])[0].decode('utf-8'))
     results = search_storage_server(my_clients[0], my_server, "Abcd")
