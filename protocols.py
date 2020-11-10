@@ -64,12 +64,10 @@ if __name__ == '__main__':
     decrypt_user = my_clients[0].data_decrypt(decrypt_proxy)
 
 
-
-    # to do
+    # ToDo
     # Generate different e and d for each client
-    # Share each client's e with the storage server
+    # Use e as key for hash
     # Remove re-encryption/decryption from storage server
-    #
 
     print(my_clients[0].data_decrypt([my_server.proxy_decryption(my_clients[0].id, [my_server._storage[0].ciphertext_pair])[0]])[0].decode('utf-8'))
     results = search_storage_server(my_clients[0], my_server, "Abcd")
