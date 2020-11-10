@@ -23,10 +23,11 @@ def setup(consultant: Consultant, clients: List[Client], storage_server: Storage
 def search_storage_server(client: Client, storage_server: StorageServer, keyword: str) -> List[str]:
     # Request search from the server
     trapdoor = client.create_trapdoor_q(bytes(keyword, encoding='utf-8'))
-    print('trapdoor: ', trapdoor)
     encrypted_results = storage_server.proxy_keyword_search(client.id, trapdoor)
     # Decrypt search results (and go from bytes to strings)
-    return [byte_result.decode() for byte_result in client.data_decrypt(encrypted_results)]
+    results = [_ for _ in client.data_decrypt(encrypted_results)]
+    print('search results: ', results)
+    return [byte_result.decode(encoding="ISO-8859-1") for byte_result in client.data_decrypt(encrypted_results)]
 
 
 # def search_storage_server_consultant(consultant: Consultant, storage_server: StorageServer, keywords: List[str])\
@@ -51,7 +52,7 @@ def upload_storage_server(client: Client, storage_server: StorageServer, documen
 
 if __name__ == '__main__':
     docs = ["Hi my name is Jelle yo", "Hello name Abcd yo", "Hi Abcd Jelle yo", "is Hello my yo"]
-    docs = ["Hi my name is Jelle yo"]
+    #docs = ["Hi my name is Jelle yo"]
     my_clients = [Client(Bn.from_num(1))]
     my_server = StorageServer()
     my_consultant = Consultant()
@@ -69,7 +70,8 @@ if __name__ == '__main__':
     # has to now be decrypted by proxy server and then the user
     decrypt_proxy = my_server.proxy_decryption(my_clients[0].id, [my_server._storage[0].ciphertext_pair])
     decrypt_user = my_clients[0].data_decrypt(decrypt_proxy)
-    print('encrypted doc:', my_server._storage[0]._ciphertext_pair, my_server._storage[0]._keywords)
+    for i, v in enumerate(docs):
+        print(f'doc{i}:', my_server._storage[i]._keywords)
     print(decrypt_user[0].decode('utf-8'))
     print(my_clients[0].data_decrypt([my_server.proxy_decryption(my_clients[0].id, [my_server._storage[0].ciphertext_pair])[0]])[0].decode('utf-8'))
     print(search_storage_server(my_clients[0], my_server, "my"))

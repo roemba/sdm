@@ -110,7 +110,7 @@ class StorageServer:
         """
         client_e, client_d = self._partial_keys[client_id]
         q_starred = self._encrypt_RSA(client_e, trapdoor_q)
-        print('q_starred: ', q_starred, 'trapdoor_q: ', trapdoor_q)
+        print('q_starred: ', q_starred)
         results = [document.ciphertext_pair for document in self._storage if q_starred in document]
-
+        print('proxy keyword search: ', results)
         return self.proxy_decryption(client_id, results)
