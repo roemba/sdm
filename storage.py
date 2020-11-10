@@ -32,10 +32,8 @@ class StorageServer:
         """
         # Storage of the partial keys corresponding to each client_id
         self._partial_keys: Dict[Bn, (Bn, Bn)] = {}
-
         self._n = None
         self.public_key = None
-
         # Storage of encrypted documents, it is a collection of encrypted documents
         self._storage: List[EncryptedDocument] = []
 
@@ -62,12 +60,9 @@ class StorageServer:
         Server re-encryptes using {c_2}* = {c_2}^e_i2. It has to do the same for every e_wm. It finally
         stores the tuple (c_1, {c_2)*, {{c_w1*, c_w2*, ..., c_wm*}}}
         """
-
         client_e, client_d = self._partial_keys[client_id]
-
         c2_starred = self._encrypt_RSA(c2, client_e)
         cw_starred = [self._encrypt_RSA(cwm, client_e) for cwm in cw]
-
         #TODO we need a storing method for the ciphertext below
         ciphertext =  (c1, c2_starred, cw_starred)
 
@@ -80,24 +75,18 @@ class StorageServer:
         """
         if len(ciphertext_pairs) == 0:
             raise ValueError("No matches for keyword were found")
-
         client_e, client_d = self._partial_keys[client_id]
         ciphertext_pairs_marked = []
-
         for ciphertext_pair in ciphertext_pairs:
             c2_marked = self._decrypt_RSA(client_d, ciphertext_pair[1])
             ciphertext_pairs_marked.append((ciphertext_pairs[0], c2_marked)) ## should be pair?
-
         return ciphertext_pairs_marked
 
     def upload_encrypted_document(self, client_id: Bn, ciphertexts: Tuple[bytes, Bn, List[Bn]]):
         client_e, client_d = self._partial_keys[client_id]
-
         c1, c2, cws = ciphertexts
-
         c2_star = self._encrypt_RSA(client_e, c2)
         cws_star = [self._encrypt_RSA(client_e, cw) for cw in cws]
-
         self._storage.append(EncryptedDocument(cws_star, (c1, c2_star)))
 
     def proxy_keyword_search(self, client_id: Bn, trapdoor_q: Bn):

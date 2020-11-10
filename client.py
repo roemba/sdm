@@ -13,12 +13,10 @@ class Client:
         Should call user key setup to create a key pair of the user
         """
         self._id = id
-
         self._n = None
         self._e = None
         self._d = None
         self._iv = None
-
 
     @property
     def id(self):
