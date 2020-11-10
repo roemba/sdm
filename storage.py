@@ -109,8 +109,8 @@ class StorageServer:
         then add ciphertext into the result set.
         """
         client_e, client_d = self._partial_keys[client_id]
-        q_starred = self._encrypt_RSA(trapdoor_q, client_e)
-        print('q_starred: ', q_starred)
+        q_starred = self._encrypt_RSA(client_e, trapdoor_q)
+        print('q_starred: ', q_starred, 'trapdoor_q: ', trapdoor_q)
         results = [document.ciphertext_pair for document in self._storage if q_starred in document]
 
         return self.proxy_decryption(client_id, results)

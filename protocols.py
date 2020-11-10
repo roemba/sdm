@@ -11,14 +11,12 @@ def setup(consultant: Consultant, clients: List[Client], storage_server: Storage
     # Setup the system for the consultant and storage_server
     public_key, iv = consultant.setup_system(128)
     storage_server.public_key = public_key
-
     # Setup the system for the clients
     for client in clients:
         # Add client
         client_pair, storage_pair = consultant.generate_user_key()
         client.assign_keys(public_key, client_pair)
         client.set_seed(iv)
-
         storage_server.new_user_partial_key(client.id, storage_pair)
 
 
@@ -27,7 +25,6 @@ def search_storage_server(client: Client, storage_server: StorageServer, keyword
     trapdoor = client.create_trapdoor_q(bytes(keyword, encoding='utf-8'))
     print('trapdoor: ', trapdoor)
     encrypted_results = storage_server.proxy_keyword_search(client.id, trapdoor)
-
     # Decrypt search results (and go from bytes to strings)
     return [byte_result.decode() for byte_result in client.data_decrypt(encrypted_results)]
 
@@ -53,12 +50,11 @@ def upload_storage_server(client: Client, storage_server: StorageServer, documen
 
 
 if __name__ == '__main__':
-    doc = "Hi my name is Jelle"
-
+    docs = ["Hi my name is Jelle yo", "Hello name Abcd yo", "Hi Abcd Jelle yo", "is Hello my yo"]
+    docs = ["Hi my name is Jelle yo"]
     my_clients = [Client(Bn.from_num(1))]
     my_server = StorageServer()
     my_consultant = Consultant()
-
     setup(my_consultant, my_clients, my_server)
 
     # TODO: Jelle to Vasanth
@@ -68,14 +64,15 @@ if __name__ == '__main__':
     # working? If it gets too frustrating we can discuss with the group haha.
     # Right now searching also does not seem to be working. I was trying to find documents containing "my" but it
     # does not manage to find any results (or so it seems).
-
-    upload_storage_server(my_clients[0], my_server, doc)
+    for doc in docs:
+        upload_storage_server(my_clients[0], my_server, doc)
     # has to now be decrypted by proxy server and then the user
     decrypt_proxy = my_server.proxy_decryption(my_clients[0].id, [my_server._storage[0].ciphertext_pair])
     decrypt_user = my_clients[0].data_decrypt(decrypt_proxy)
+    print('encrypted doc:', my_server._storage[0]._ciphertext_pair, my_server._storage[0]._keywords)
     print(decrypt_user[0].decode('utf-8'))
-
     print(my_clients[0].data_decrypt([my_server.proxy_decryption(my_clients[0].id, [my_server._storage[0].ciphertext_pair])[0]])[0].decode('utf-8'))
-
-    results = search_storage_server(my_clients[0], my_server, "my")
-    print(results)
+    print(search_storage_server(my_clients[0], my_server, "my"))
+    print(search_storage_server(my_clients[0], my_server, "Hi"))
+    print(search_storage_server(my_clients[0], my_server, "Jelle"))
+    print(search_storage_server(my_clients[0], my_server, "yo"))

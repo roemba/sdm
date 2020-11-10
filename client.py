@@ -91,5 +91,4 @@ class Client:
 
         User computes the hash of the keyword sigma = H(W) an encrypts Q = sigma^{e_j2}. User sends Q to server
         """
-
         return self._encrypt_RSA(sha256(keyword).digest())
