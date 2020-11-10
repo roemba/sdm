@@ -79,7 +79,7 @@ class StorageServer:
         ciphertext_pairs_marked = []
         for ciphertext_pair in ciphertext_pairs:
             c2_marked = self._decrypt_RSA(client_d, ciphertext_pair[1])
-            ciphertext_pairs_marked.append((ciphertext_pairs[0], c2_marked)) ## should be pair?
+            ciphertext_pairs_marked.append((ciphertext_pair[0], c2_marked)) ## Fixed, shouldn't  be pair
         return ciphertext_pairs_marked
 
     def upload_encrypted_document(self, client_id: Bn, ciphertexts: Tuple[bytes, Bn, List[Bn]]):

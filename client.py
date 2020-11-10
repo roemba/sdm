@@ -77,7 +77,7 @@ class Client:
         for ciphertext_pair in ciphertext_pairs:
             c2 = self._decrypt_RSA(ciphertext_pair[1])
             decryption = aes.dec(c2, self._iv)
-            plaintext = decryption.update(ciphertext_pair[0][0])
+            plaintext = decryption.update(ciphertext_pair[0])
             plaintext += decryption.finalize()
             documents.append(plaintext)
         return documents
