@@ -75,9 +75,10 @@ class Client:
         documents = []
         aes = Cipher("AES-128-CTR")
         for ciphertext_pair in ciphertext_pairs:
-            c2 = self._decrypt_RSA(ciphertext_pair[1])
+            c1, c2_marked = ciphertext_pair
+            c2 = self._decrypt_RSA(c2_marked)
             decryption = aes.dec(c2, self._iv)
-            plaintext = decryption.update(ciphertext_pair[0])
+            plaintext = decryption.update(c1)
             plaintext += decryption.finalize()
             documents.append(plaintext)
         return documents

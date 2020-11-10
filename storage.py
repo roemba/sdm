@@ -62,6 +62,7 @@ class StorageServer:
         """
         client_e, client_d = self._partial_keys[client_id]
         c2_starred = self._encrypt_RSA(c2, client_e)
+        print("c2 proxy when encrypted ", c2_starred)
         cw_starred = [self._encrypt_RSA(cwm, client_e) for cwm in cw]
         #TODO we need a storing method for the ciphertext below
         ciphertext =  (c1, c2_starred, cw_starred)
@@ -76,16 +77,19 @@ class StorageServer:
         if len(ciphertext_pairs) == 0:
             raise ValueError("No matches for keyword were found")
         client_e, client_d = self._partial_keys[client_id]
+
         ciphertext_pairs_marked = []
         for ciphertext_pair in ciphertext_pairs:
-            c2_marked = self._decrypt_RSA(client_d, ciphertext_pair[1])
-            ciphertext_pairs_marked.append((ciphertext_pair[0], c2_marked)) ## Fixed, shouldn't  be pair
+            c1, c2_starred = ciphertext_pair
+            c2_marked = self._decrypt_RSA(client_d, c2_starred)
+            ciphertext_pairs_marked.append((c1, c2_marked))
         return ciphertext_pairs_marked
 
     def upload_encrypted_document(self, client_id: Bn, ciphertexts: Tuple[bytes, Bn, List[Bn]]):
         client_e, client_d = self._partial_keys[client_id]
         c1, c2, cws = ciphertexts
         c2_star = self._encrypt_RSA(client_e, c2)
+
         cws_star = [self._encrypt_RSA(client_e, cw) for cw in cws]
         self._storage.append(EncryptedDocument(cws_star, (c1, c2_star)))
 

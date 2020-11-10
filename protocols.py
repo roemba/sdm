@@ -9,7 +9,7 @@ from storage import StorageServer
 
 def setup(consultant: Consultant, clients: List[Client], storage_server: StorageServer):
     # Setup the system for the consultant and storage_server
-    public_key, iv = consultant.setup_system(128)
+    public_key, iv = consultant.setup_system(256)
     storage_server.public_key = public_key
     # Setup the system for the clients
     for client in clients:
@@ -52,7 +52,7 @@ def upload_storage_server(client: Client, storage_server: StorageServer, documen
 
 if __name__ == '__main__':
     docs = ["Hi my name is Jelle yo", "Hello name Abcd yo", "Hi Jelle yo", "is Hello my yo"]
-    #docs = ["Hi my name is Jelle yo"]
+    #docs = ["Hi my name is Jelle yo", "Hi Jelle yo"]
     my_clients = [Client(Bn.from_num(1))]
     my_server = StorageServer()
     my_consultant = Consultant()
@@ -81,7 +81,7 @@ if __name__ == '__main__':
     #
     # searching for Hello should return two documents correctly decrypted but only the first one seems fine.
     # re-run the file if you get any errors - i get multiple outputs
-    print(decrypt_user[0].decode('utf-8'))
+    #print(decrypt_user[0].decode('utf-8'))
     print(my_clients[0].data_decrypt([my_server.proxy_decryption(my_clients[0].id, [my_server._storage[0].ciphertext_pair])[0]])[0].decode('utf-8'))
     results = search_storage_server(my_clients[0], my_server, "Abcd")
     print(results)
