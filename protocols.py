@@ -71,18 +71,9 @@ if __name__ == '__main__':
 
     upload_storage_server(my_clients[0], my_server, doc)
     # has to now be decrypted by proxy server and then the user
-    print('after insertion: ciphertext pair', my_server._storage[0].ciphertext_pair)
     decrypt_proxy = my_server.proxy_decryption(my_clients[0].id, [my_server._storage[0].ciphertext_pair])
-    print('after proxy decryption: ', decrypt_proxy)
     decrypt_user = my_clients[0].data_decrypt(decrypt_proxy)
-    print('after user decryption: ', decrypt_user)
     print(decrypt_user[0].decode('utf-8'))
-    #decrypt_doc = my_clients[0].data_decrypt([my_server._storage[0].ciphertext_pair])
-
-
-
-    #print(decrypt_doc, decrypt_doc[0])
-    #print(type(my_server._storage[0].ciphertext_pair[1]))
 
     print(my_clients[0].data_decrypt([my_server.proxy_decryption(my_clients[0].id, [my_server._storage[0].ciphertext_pair])[0]])[0].decode('utf-8'))
 
