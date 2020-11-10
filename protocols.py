@@ -26,8 +26,7 @@ def search_storage_server(client: Client, storage_server: StorageServer, keyword
     encrypted_results = storage_server.proxy_keyword_search(client.id, trapdoor)
     # Decrypt search results (and go from bytes to strings)
     results = [_ for _ in client.data_decrypt(encrypted_results)]
-    print('search results: ', results)
-    return [byte_result.decode(encoding="ISO-8859-1") for byte_result in client.data_decrypt(encrypted_results)]
+    return [byte_result.decode() for byte_result in client.data_decrypt(encrypted_results)]
 
 
 # def search_storage_server_consultant(consultant: Consultant, storage_server: StorageServer, keywords: List[str])\
@@ -52,36 +51,26 @@ def upload_storage_server(client: Client, storage_server: StorageServer, documen
 
 if __name__ == '__main__':
     docs = ["Hi my name is Jelle yo", "Hello name Abcd yo", "Hi Jelle yo", "is Hello my yo"]
-    #docs = ["Hi my name is Jelle yo", "Hi Jelle yo"]
-    my_clients = [Client(Bn.from_num(1))]
+    doc2 = "Abcd yee"
+    my_clients = [Client(Bn.from_num(1)), Client(Bn.from_num(2))]
     my_server = StorageServer()
     my_consultant = Consultant()
     setup(my_consultant, my_clients, my_server)
 
-    # TODO: Jelle to Vasanth
-    # So the code here just sets up one client, one storage server and one consultant and I am trying to
-    # upload a document and then to decrypt it with the same client. Right now this code is *super* messy as I just
-    # wanted to check if it was working (and it doesn't seem to work). Could you have a look if you can get this
-    # working? If it gets too frustrating we can discuss with the group haha.
-    # Right now searching also does not seem to be working. I was trying to find documents containing "my" but it
-    # does not manage to find any results (or so it seems).
     for doc in docs:
         upload_storage_server(my_clients[0], my_server, doc)
-    # has to now be decrypted by proxy server and then the user
+    upload_storage_server(my_clients[1], my_server, doc2)
     decrypt_proxy = my_server.proxy_decryption(my_clients[0].id, [my_server._storage[0].ciphertext_pair])
     decrypt_user = my_clients[0].data_decrypt(decrypt_proxy)
-    for i, v in enumerate(docs):
-        print(f'doc{i}:', my_server._storage[i]._ciphertext_pair, my_server._storage[i]._keywords)
 
 
-    # A user is able to add and decrypt their own document. Searching is fine when there is only document returned
-    # but when there are multiple docs being returned, it leads to nonsensical decryptions when printing the results
-    # even though the keyword matches correctly. encoding method had to be changed to "ISO-8859-1" for the results to
-    # be returned otherwise it fails
+
+    # to do
+    # Generate different e and d for each client
+    # Share each client's e with the storage server
+    # Remove re-encryption/decryption from storage server
     #
-    # searching for Hello should return two documents correctly decrypted but only the first one seems fine.
-    # re-run the file if you get any errors - i get multiple outputs
-    #print(decrypt_user[0].decode('utf-8'))
+
     print(my_clients[0].data_decrypt([my_server.proxy_decryption(my_clients[0].id, [my_server._storage[0].ciphertext_pair])[0]])[0].decode('utf-8'))
     results = search_storage_server(my_clients[0], my_server, "Abcd")
     print(results)
@@ -93,3 +82,5 @@ if __name__ == '__main__':
     decrypt_proxy = my_server.proxy_decryption(my_clients[0].id, [my_server._storage[3].ciphertext_pair])
     decrypt_user = my_clients[0].data_decrypt(decrypt_proxy)
     print(decrypt_user[0].decode('utf-8'))
+    print(my_clients[1].data_decrypt([my_server.proxy_decryption(my_clients[1].id, [my_server._storage[4].ciphertext_pair])[0]])[
+              0].decode('utf-8'))

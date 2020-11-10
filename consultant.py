@@ -33,7 +33,7 @@ class Consultant:
         self._e = Bn.from_num(65537)
         self._d = self._e.mod_inverse(self._phi_n)
 
-        iv  = urandom(16)
+        iv = urandom(16)
 
         return self._n, iv
 
