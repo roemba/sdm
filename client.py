@@ -3,41 +3,31 @@ from os import urandom
 from typing import List, Tuple
 
 from petlib.bn import Bn
-from petlib.cipher import Cipher
+
+from uuid import UUID, uuid4
+from models import KeyPair, EncryptedDocument, AES
 
 
 class Client:
 
-    def __init__(self, id: Bn):
+    def __init__(self):
         """
         Should call user key setup to create a key pair of the user
         """
-        self._id = id
+        self._id = uuid4()
         self._n = None
-        self._e = None
-        self._d = None
+        self._keypair = None
         self._iv = None
 
     @property
     def id(self):
         return self._id
 
-    def assign_keys(self, public_key: Bn, partial_key: (Bn, Bn)):
+    def assign_keypair(self, public_key: Bn, keypair: KeyPair):
         self._n = public_key
-        self._e, self._d = partial_key
+        self._keypair = keypair
 
-    def _encrypt_RSA(self, plaintext: bytes) -> Bn:
-        #Already converts using big endian, I think it is unnecessary to convert first to number. 
-        return Bn.from_binary(plaintext).mod_pow(self._e, self._n)
-        #return Bn.from_num(int.from_bytes(plaintext, byteorder='big')).mod_pow(self._e, self._n)
-
-    def _decrypt_RSA(self, ciphertext: Bn) -> bytes:
-        return ciphertext.mod_pow(self._d, self._n).binary()
-
-    def set_seed(self, iv):
-        self._iv = iv
-
-    def encrypt_data(self, plaintext: bytes, search_keywords: List[bytes]) -> (Bn, Bn, List[Bn]):
+    def encrypt_data(self, plaintext: bytes, search_keywords: List[bytes]) -> EncryptedDocument:
         """
         input: plaintext to be encrypted and a set of searching keyword for that document
         output: success maybe?
@@ -52,18 +42,13 @@ class Client:
         c_wm = (sigma_wm)^e_i1 hash encrypted under RSA encryption and sends to the server
         """
         # Select a one-time random key and IV for AES-128-CTR
-        aes = Cipher("AES-128-CTR")
-        key = urandom(16)
-        # Encrypt the data
-        enc = aes.enc(key, self._iv)
-        c1 = enc.update(plaintext)
-        c1 += enc.finalize()
+        ciphertext, key, iv = AES.encrypt(plaintext)
         # TODO: Check that the modulus n is at least 16 bytes long and large enough for the keywords to fit in
-        c2 = self._encrypt_RSA(key)
-        cw = [self._encrypt_RSA(sha256(kw).digest()) for kw in search_keywords]
-        return c1, c2, cw
+        encrypted_key = self._keypair.encrypt_RSA(key)
+        encrypted_keywords = [self.create_trapdoor_q(kw) for kw in search_keywords]
+        return EncryptedDocument(ciphertext, encrypted_key, encrypted_keywords, iv)
 
-    def data_decrypt(self, ciphertext_pairs: List[Tuple[bytes, Bn]]) -> List[bytes]:
+    def data_decrypt(self, encrypted_documents: List[EncryptedDocument]) -> List[bytes]:
         """
         input is the ciphertext extracted from the server for every plaintext item 
               after proxy re-decryption c_1, c_2'
@@ -73,14 +58,11 @@ class Client:
         plaintext = {E_{k_x}}^-1(c_1) (because encryption is symmetric so it needs to have an inverse function)
         """
         documents = []
-        aes = Cipher("AES-128-CTR")
-        for ciphertext_pair in ciphertext_pairs:
-            c1, c2_marked = ciphertext_pair
-            c2 = self._decrypt_RSA(c2_marked)
-            decryption = aes.dec(c2, self._iv)
-            plaintext = decryption.update(c1)
-            plaintext += decryption.finalize()
+        for encrypted_document in encrypted_documents:
+            key = self._keypair.decrypt_RSA(encrypted_document.encrypted_key)
+            plaintext = AES.decrypt(encrypted_document.ciphertext, key, encrypted_document.iv)
             documents.append(plaintext)
+
         return documents
 
     def create_trapdoor_q(self, keyword: bytes):
@@ -90,4 +72,4 @@ class Client:
 
         User computes the hash of the keyword sigma = H(W) an encrypts Q = sigma^{e_j2}. User sends Q to server
         """
-        return self._encrypt_RSA(sha256(keyword).digest())
+        return self._keypair.encrypt_RSA(sha256(keyword).digest())
