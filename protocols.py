@@ -12,8 +12,8 @@ def setup(consultant: Consultant, clients: List[Client], storage_server: Storage
     # Setup the system for the clients
     for client in clients:
         # Add client
-        keypair = consultant.generate_user_keypair(client)
-        client.assign_keypair(keypair)
+        client_keys = consultant.generate_client_keys(client)
+        client.assign_keys(client_keys)
 
 def upload_storage_server(client: Client, storage_server: StorageServer, document: str):
     # Encrypt the document
@@ -29,7 +29,7 @@ if __name__ == '__main__':
     doc2 = "Abcd yee"
     my_clients = [Client(), Client()]
     my_server = StorageServer()
-    my_consultant = Consultant(256)
+    my_consultant = Consultant()
     setup(my_consultant, my_clients, my_server)
 
     for doc in docs:
@@ -49,13 +49,8 @@ if __name__ == '__main__':
     assert len(results_2) == 0
 
     # Client 2 should not be able to decrypt client 1's results
-    exception_happened = False
-    try:
-        decrypted_results_2 = my_clients[1].data_decrypt(results_1)
-    except Exception as e:
-        exception_happened = True
-    
-    assert exception_happened
+    decrypted_results_2 = my_clients[1].data_decrypt(results_1)
+    assert set(decrypted_results_2) != set(results_1)
 
     # Consultant should be able to decrypt client 1's results
     decrypted_results_3 = my_consultant.data_decrypt(results_1, my_clients[0].id)
