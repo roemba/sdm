@@ -29,20 +29,25 @@ class AES:
         return plaintext
 
 class KeyPair:
-    def __init__(self, phi_n: Bn, n: Bn, client_id: int):
+    def __init__(self, k: int, client_id: int):
+        p = Bn.get_prime(k // 2)
+        q = Bn.get_prime(k // 2)
+
+        self._n = p * q
+        self._phi_n = (p - 1) * (q - 1)
+
         # Generate random e, requirements: 0 < e < phi_n, e and phi_n are coprime and e should be large
         while True:
-            random_e = phi_n.random()
+            random_e = self._phi_n.random()
 
-            if random_e >= 100 and gcd(random_e, phi_n) == 1:
+            if random_e >= 100 and gcd(random_e, self._phi_n) == 1:
                 break
 
 
         self._e = random_e
-        self._d = self._e.mod_inverse(phi_n)
+        self._d = self._e.mod_inverse(self._phi_n)
 
         self._client_id = client_id
-        self._n = n
 
     def encrypt_RSA(self, plaintext: bytes) -> Bn:
         return Bn.from_binary(plaintext).mod_pow(self._e, self._n)

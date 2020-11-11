@@ -10,31 +10,12 @@ class Consultant:
     This is the trusted party (consultant) in the protocol, setting up and managing all the keys.
     """
 
-    def __init__(self):
-        self._n = None
-        self._phi_n = None
-
-        self._e = None
-        self._d = None
-
+    def __init__(self, k: int):
         self._client_keypairs: Dict[UUID, KeyPair] = {}
-
-    def setup_system(self, k: int) -> Bn:
-        """
-        input: k is a security parameter
-        output: n
-        k is used to generate (p, q, n, totient(n))
-        """
-        p = Bn.get_prime(k // 2)
-        q = Bn.get_prime(k // 2)
-
-        self._n = p * q
-        self._phi_n = (p - 1) * (q - 1)
-
-        return self._n
+        self.k = k
 
     def generate_user_keypair(self, client) -> (KeyPair, UUID):
-        kp = KeyPair(self._phi_n, self._n, client.id)
+        kp = KeyPair(self.k, client.id)
         
         if client.id in self._client_keypairs:
             raise ValueError("Cannot generate a new keypair for an already existing client!")

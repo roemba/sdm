@@ -9,13 +9,11 @@ from storage import StorageServer
 
 
 def setup(consultant: Consultant, clients: List[Client], storage_server: StorageServer):
-    # Setup the system for the consultant and storage_server
-    public_key = consultant.setup_system(256)
     # Setup the system for the clients
     for client in clients:
         # Add client
         keypair = consultant.generate_user_keypair(client)
-        client.assign_keypair(public_key, keypair)
+        client.assign_keypair(keypair)
 
 def upload_storage_server(client: Client, storage_server: StorageServer, document: str):
     # Encrypt the document
@@ -31,7 +29,7 @@ if __name__ == '__main__':
     doc2 = "Abcd yee"
     my_clients = [Client(), Client()]
     my_server = StorageServer()
-    my_consultant = Consultant()
+    my_consultant = Consultant(256)
     setup(my_consultant, my_clients, my_server)
 
     for doc in docs:

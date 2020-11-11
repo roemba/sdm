@@ -15,7 +15,6 @@ class Client:
         Should call user key setup to create a key pair of the user
         """
         self._id = uuid4()
-        self._n = None
         self._keypair = None
         self._iv = None
 
@@ -23,8 +22,7 @@ class Client:
     def id(self):
         return self._id
 
-    def assign_keypair(self, public_key: Bn, keypair: KeyPair):
-        self._n = public_key
+    def assign_keypair(self, keypair: KeyPair):
         self._keypair = keypair
 
     def encrypt_data(self, plaintext: bytes, search_keywords: List[bytes]) -> EncryptedDocument:
