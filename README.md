@@ -11,4 +11,4 @@ The following packages are necessary to install `petlib`.
 - Install libffi-dev: `sudo apt-get install libffi-dev`
 
 ### Proxy re-encryption
-This implementation is based on a method outlined in *Shared and Searchable Encrypted Data for Untrusted Servers* by Changyu Dong, Giovanni Russello, and Naranker Dulay. It uses RSA as the encryption for a multi reader/multi writer sytem. For access control we define 
+This implementation is inspired by a method outlined in *Shared and Searchable Encrypted Data for Untrusted Servers* by Changyu Dong, Giovanni Russello, and Naranker Dulay.

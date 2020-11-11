@@ -1,12 +1,7 @@
-from hashlib import sha256
-from os import urandom
-from typing import List, Tuple
+from typing import List
+from uuid import uuid4
 
-from petlib.bn import Bn
-
-from uuid import UUID, uuid4
-from models import EncryptedDocument, AES, Keys
-from hmac import digest as hmac_digest
+from models import EncryptedDocument, Keys, CryptoFunctions
 
 
 class Client:
@@ -27,17 +22,10 @@ class Client:
         self._keys = keys
 
     def encrypt_data(self, plaintext: bytes, search_keywords: List[bytes]) -> EncryptedDocument:
-        ciphertext, iv = AES.encrypt(plaintext, self._keys.encryption_key)
-        encrypted_keywords = [self.create_trapdoor_q(kw) for kw in search_keywords]
-        return EncryptedDocument(ciphertext, encrypted_keywords, iv)
+        return CryptoFunctions.encrypt_data(plaintext, search_keywords, self._keys)
 
     def data_decrypt(self, encrypted_documents: List[EncryptedDocument]) -> List[bytes]:
-        documents = []
-        for encrypted_document in encrypted_documents:
-            plaintext = AES.decrypt(encrypted_document.ciphertext, self._keys.encryption_key, encrypted_document.iv)
-            documents.append(plaintext)
+        return CryptoFunctions.data_decrypt(encrypted_documents, self._keys)
 
-        return documents
-
-    def create_trapdoor_q(self, keyword: bytes):
-        return hmac_digest(self._keys.hashing_key, keyword, sha256)
+    def create_trapdoor_q(self, keyword: bytes) -> bytes:
+        return CryptoFunctions.create_trapdoor_q(keyword, self._keys)

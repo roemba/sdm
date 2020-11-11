@@ -1,7 +1,6 @@
-from typing import Dict, List, Tuple
+from typing import Dict, List
 from uuid import UUID
 
-from petlib.bn import Bn
 from models import EncryptedDocument
 
 
@@ -17,5 +16,5 @@ class StorageServer:
 
         self._storage[client_id].append(document)
 
-    def keyword_search(self, trapdoor_q: Bn, client_id: UUID):
+    def keyword_search(self, trapdoor_q: bytes, client_id: UUID):
         return [document for document in self._storage[client_id] if trapdoor_q in document.encrypted_keywords]

@@ -49,8 +49,13 @@ if __name__ == '__main__':
     assert len(results_2) == 0
 
     # Client 2 should not be able to decrypt client 1's results
-    decrypted_results_2 = my_clients[1].data_decrypt(results_1)
-    assert set(decrypted_results_2) != set(results_1)
+    exception_happened = False
+    try:
+        decrypted_results_2 = my_clients[1].data_decrypt(results_1)
+    except Exception:
+        exception_happened = True
+
+    assert exception_happened
 
     # Consultant should be able to decrypt client 1's results
     decrypted_results_3 = my_consultant.data_decrypt(results_1, my_clients[0].id)
