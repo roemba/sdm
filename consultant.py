@@ -3,13 +3,14 @@ from uuid import UUID
 
 from models import Keys, EncryptedDocument, CryptoFunctions
 
+
 class Consultant:
     """
     This is the trusted party (consultant) in the protocol, setting up and managing all the keys.
     """
 
     def __init__(self):
-        self._client_keys: Dict[UUID, bytes] = {}
+        self._client_keys: Dict[UUID, Keys] = {}
 
     def generate_client_keys(self, client) -> (Keys, UUID):
         client_keys = Keys()

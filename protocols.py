@@ -8,12 +8,13 @@ from consultant import Consultant
 from storage import StorageServer
 
 
-def setup(consultant: Consultant, clients: List[Client], storage_server: StorageServer):
+def setup(consultant: Consultant, clients: List[Client]):
     # Setup the system for the clients
     for client in clients:
         # Add client
         client_keys = consultant.generate_client_keys(client)
         client.assign_keys(client_keys)
+
 
 def upload_storage_server(client: Client, storage_server: StorageServer, document: str):
     # Encrypt the document
@@ -24,13 +25,13 @@ def upload_storage_server(client: Client, storage_server: StorageServer, documen
     storage_server.upload_document(encrypted_document, client.id)
 
 
-if __name__ == '__main__':
+def tests():
     docs = ["Hi my name is Jelle yo", "Hello name Abcd yo", "Hi Jelle yo", "is Hello my yo"]
     doc2 = "Abcd yee"
     my_clients = [Client(), Client()]
     my_server = StorageServer()
     my_consultant = Consultant()
-    setup(my_consultant, my_clients, my_server)
+    setup(my_consultant, my_clients)
 
     for doc in docs:
         upload_storage_server(my_clients[0], my_server, doc)
@@ -66,3 +67,7 @@ if __name__ == '__main__':
     hi_trapdoor_3 = my_consultant.create_trapdoor_q("Hi".encode(), my_clients[0].id)
     results_4 = my_server.keyword_search(hi_trapdoor_3, my_clients[0].id)
     assert results_4 == results_1
+
+
+if __name__ == '__main__':
+    tests()

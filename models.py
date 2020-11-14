@@ -1,4 +1,3 @@
-from math import gcd
 from typing import List
 from os import urandom
 from hmac import digest as hmac_digest
@@ -20,10 +19,12 @@ class AES:
     def decrypt(ciphertext: bytes, key: bytes, iv: bytes, auth_tag: bytes) -> bytes:
         return Cipher.aes_256_gcm().quick_gcm_dec(key, iv, ciphertext, auth_tag)
 
+
 class Keys:
     def __init__(self):
         self.encryption_key = urandom(32)
         self.hashing_key = urandom(32)
+
 
 class EncryptedDocument:
     def __init__(self, ciphertext: bytes, encrypted_keywords: List[bytes], iv: bytes, auth_tag: bytes):
@@ -31,6 +32,7 @@ class EncryptedDocument:
         self.encrypted_keywords = frozenset(encrypted_keywords)
         self.iv = iv
         self.auth_tag = auth_tag
+
 
 class CryptoFunctions:
     @staticmethod
