@@ -16,10 +16,13 @@ def setup(consultant: Consultant, clients: List[Client]):
         client.assign_keys(client_keys)
 
 
-def upload_storage_server(client: Client, storage_server: StorageServer, document: str):
+def upload_storage_server(client: Client, storage_server: StorageServer, document: str, keywords: List[str]):
+    upload_storage_server_bytes(client, storage_server, document.encode(), [keyword.encode() for keyword in keywords])
+
+
+def upload_storage_server_bytes(client: Client, storage_server: StorageServer, document: bytes, keywords: List[bytes]):
     # Encrypt the document
-    keywords = document.split()
-    encrypted_document = client.encrypt_data(document.encode(), [keyword.encode() for keyword in keywords])
+    encrypted_document = client.encrypt_data(document, keywords)
 
     # Upload to the storage server
     storage_server.upload_document(encrypted_document, client.id)
@@ -34,8 +37,8 @@ def tests():
     setup(my_consultant, my_clients)
 
     for doc in docs:
-        upload_storage_server(my_clients[0], my_server, doc)
-    upload_storage_server(my_clients[1], my_server, doc2)
+        upload_storage_server(my_clients[0], my_server, doc, doc.split())
+    upload_storage_server(my_clients[1], my_server, doc2, doc2.split())
 
     # Search for a document with 'Hi' in it using Client 1 - should succeed
     hi_trapdoor_1 = my_clients[0].create_trapdoor_q("Hi".encode())
