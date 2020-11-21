@@ -1,4 +1,5 @@
 import os
+import sys
 import time
 import statistics
 from itertools import product
@@ -123,17 +124,121 @@ def evaluate_search_runtime():
         print(f"{dc} documents with {kc} keywords: {runtime} ms")
 
 
+def evaluate_upload_bandwidth():
+    experiment_count = 100
+
+    print("Evaluate upload for a single run")
+
+    document_sizes = [16 * 1024, 256 * 1024, 1024 * 1024]  # 16kB, 256kB, 1MB
+    keyword_counts = [10, 100, 1000]
+
+    # Generate test data
+    client = Client()
+    consultant = Consultant()
+
+    setup(consultant, [client])
+
+    test_documents = [[os.urandom(document_size) for _ in range(experiment_count)] for document_size in document_sizes]
+    test_keywords = [[[os.urandom(8) for _ in range(keyword_count)] for _ in range(experiment_count)] for keyword_count
+                     in keyword_counts]
+
+    # perform bandwidth analysis
+    for experiment_documents in test_documents:
+        print(f"Trying for document sizes: {document_sizes}")
+        for experiment_keywords in test_keywords:
+            print(f"- Trying for keyword counts: {keyword_counts}")
+            bandwidth = 0
+
+            for document, keywords in zip(experiment_documents, experiment_keywords):
+                encrypted_document = client.encrypt_data(document, keywords)
+                client_id = client.id
+
+                bandwidth += sys.getsizeof(encrypted_document)
+                bandwidth += sys.getsizeof(client_id)
+
+            print(bandwidth / experiment_count / 1024)
+
+
+def evaluate_search_bandwidth():
+    experiment_count = 50
+
+    document_counts = [16, 64, 256]
+    keyword_counts = [10, 100, 1000]
+
+    # Generate test data
+    client = Client()
+    consultant = Consultant()
+    server = StorageServer()
+
+    setup(consultant, [client])
+
+    # Perform bandwidth analysis
+    for dc, kc in product(document_counts, keyword_counts):
+        encrypted_documents = [[client.encrypt_data(os.urandom(256 * 1024), [os.urandom(1) for _ in range(kc)]) for _ in range(dc)] for _ in range(experiment_count)]
+
+        bandwidth = 0
+        for experiment_documents in encrypted_documents:
+            server._storage[client.id] = experiment_documents
+
+            trapdoor = client.create_trapdoor_q(os.urandom(1))
+
+            bandwidth += sys.getsizeof(trapdoor)
+            bandwidth += sys.getsizeof(client.id)
+
+            for result in server.keyword_search(trapdoor, client.id):
+                bandwidth += sys.getsizeof(result)
+
+        print(f"{dc} documents with {kc} keywords: {bandwidth / experiment_count / 1024 / 1024} MB")
+
+
+def evaluate_storage_single_user():
+    experiment_count = 100
+
+    print("Evaluate server storage for a single user with 20 items")
+
+    document_sizes = [16 * 1024, 256 * 1024, 1024 * 1024]  # 16kB, 256kB, 1MB
+    keyword_counts = [10, 100, 1000]
+
+    # Generate test data
+    client = Client()
+    consultant = Consultant()
+    server = StorageServer()
+
+    setup(consultant, [client])
+
+    test_documents = [[os.urandom(document_size) for _ in range(experiment_count)] for document_size in document_sizes]
+    test_keywords = [[[os.urandom(8) for _ in range(keyword_count)] for _ in range(experiment_count)] for keyword_count in keyword_counts]
+
+    # perform storage analysis
+    for experiment_documents in test_documents:
+        print(f"Trying for document sizes: {document_sizes}")
+        for experiment_keywords in test_keywords:
+            print(f"- Trying for keyword counts: {keyword_counts}")
+
+            for _ in range(20):
+                for document, keywords in zip(experiment_documents, experiment_keywords):
+                    upload_storage_server_bytes(client, server, document, keywords)
+
+            print(f"{sys.getsizeof(server) / experiment_count / 1024 / 1024} MB")
+            server._storage = {}
+
+
 if __name__ == '__main__':
-    print("> Warm-up run")
-    evaluate_setup_runtime()
+    # print("> Warm-up run")
+    # evaluate_setup_runtime()
+    #
+    # print("> Actual evaluation")
+    #
+    # print("|Setup|")
+    # evaluate_setup_runtime()
+    #
+    # print("|Upload|")
+    # evaluate_upload_runtime()
+    #
+    # print("|Search|")
+    # evaluate_search_runtime()
 
-    print("> Actual evaluation")
+    #evaluate_upload_bandwidth()
+    #evaluate_search_bandwidth()
 
-    print("|Setup|")
-    evaluate_setup_runtime()
-
-    print("|Upload|")
-    evaluate_upload_runtime()
-
-    print("|Search|")
-    evaluate_search_runtime()
+    evaluate_storage_single_user()

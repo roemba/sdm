@@ -1,3 +1,4 @@
+import sys
 from typing import List
 from os import urandom
 from hmac import digest as hmac_digest
@@ -32,6 +33,12 @@ class EncryptedDocument:
         self.encrypted_keywords = frozenset(encrypted_keywords)
         self.iv = iv
         self.auth_tag = auth_tag
+
+    def __sizeof__(self):
+        return sys.getsizeof(self.ciphertext) +\
+               sys.getsizeof(self.encrypted_keywords) +\
+               sys.getsizeof(self.iv) +\
+               sys.getsizeof(self.auth_tag)
 
 
 class CryptoFunctions:
