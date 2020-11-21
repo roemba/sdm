@@ -1,6 +1,7 @@
 import os
 import time
 import statistics
+from itertools import product
 from typing import List
 
 from client import Client
@@ -29,7 +30,7 @@ def evaluate_setup_runtime():
     experiment_count = 100
     run_count = 100
     client_counts = [5, 10, 15, 20, 25, 30, 45, 50]
-    print(f"Evaluate setup runtime for client counts {client_counts}, performing {experiment_count} of "
+    print(f"Evaluate setup runtime for client counts {client_counts}, performing {experiment_count} experiments of "
           f"{run_count} runs.")
 
     runtimes = []
@@ -61,6 +62,8 @@ def evaluate_setup_runtime():
 def evaluate_upload_runtime():
     experiment_count = 100
 
+    print("Evaluate upload for a single run")
+
     document_sizes = [16 * 1024, 256 * 1024, 1024 * 1024]  # 16kB, 256kB, 1MB
     keyword_counts = [10, 100, 1000]
 
@@ -76,7 +79,9 @@ def evaluate_upload_runtime():
 
     # perform runtime analysis
     for experiment_documents in test_documents:
+        print(f"Trying for document sizes: {document_sizes}")
         for experiment_keywords in test_keywords:
+            print(f"- Trying for keyword counts: {keyword_counts}")
             start = time.monotonic()
 
             for document, keywords in zip(experiment_documents, experiment_keywords):
@@ -90,11 +95,45 @@ def evaluate_upload_runtime():
 def evaluate_search_runtime():
     experiment_count = 100
     run_count = 100
-    client_counts = [5, 10, 15, 20, 25]
+
+    print("Evaluate 100 searches")
+
     document_counts = [16, 64, 256]
     keyword_counts = [10, 100, 1000]
 
+    # Generate test data
+    client = Client()
+    consultant = Consultant()
+    server = StorageServer()
+
+    setup(consultant, [client])
+
+    # Perform runtime analysis
+    for dc, kc in product(document_counts, keyword_counts):
+        encrypted_documents = [[client.encrypt_data(os.urandom(8), [os.urandom(8) for _ in range(kc)]) for _ in range(dc)] for _ in range(experiment_count)]
+
+        start = time.monotonic()
+        for experiment_documents in encrypted_documents:
+            server._storage[client.id] = experiment_documents
+
+            for _ in range(run_count):
+                server.keyword_search(client.create_trapdoor_q(os.urandom(8)), client.id)
+
+        runtime = (time.monotonic() - start) / experiment_count * 1000
+        print(f"{dc} documents with {kc} keywords: {runtime} ms")
+
 
 if __name__ == '__main__':
-    #evaluate_setup_runtime()
+    print("> Warm-up run")
+    evaluate_setup_runtime()
+
+    print("> Actual evaluation")
+
+    print("|Setup|")
+    evaluate_setup_runtime()
+
+    print("|Upload|")
     evaluate_upload_runtime()
+
+    print("|Search|")
+    evaluate_search_runtime()
