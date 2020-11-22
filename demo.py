@@ -4,11 +4,11 @@ import PySimpleGUI as sg
 
 from client import Client
 from consultant import Consultant
+from models import AES
 from protocols import setup, upload_storage_server, upload_storage_server_filename
 from storage import StorageServer
 
 sg.theme('Dark Blue 3')  # please make your windows colorful
-
 
 # Create a setup with three clients
 consultant = Consultant()
@@ -23,7 +23,8 @@ def select_user() -> str:
               [sg.Button("Consultant", key='consultant'),
                sg.Button("Client 1", key='client1'),
                sg.Button("Client 2", key='client2'),
-               sg.Button("Client 3", key='client3')]]
+               sg.Button("Client 3", key='client3'),
+               sg.Button("Storage Server", key='server')]]
 
     window = sg.Window('User Selection', layout)
 
@@ -42,7 +43,7 @@ def show_client(key: str):
               [sg.Input(size=(50, 1), key='input', enable_events=True), sg.FileBrowse()],
               [sg.Text('Keywords: '), sg.Text(size=(80, 1), key='keywords')],
               [sg.Button('Upload', key='upload'), sg.Text(size=(20, 1), key='success')],
-              [sg.Button('Exit')]]
+              [sg.Button('Back')]]
     window = sg.Window(client_text, layout)
 
     ready = False
@@ -51,7 +52,7 @@ def show_client(key: str):
         event, values = window.read()
         print(event, values)
 
-        if event == sg.WIN_CLOSED or event == 'Exit':
+        if event == sg.WIN_CLOSED or event == 'Back':
             break
 
         elif event == 'input':
@@ -72,9 +73,33 @@ def show_client(key: str):
                 window['success'].update("Not ready to upload")
                 continue
 
-            upload_storage_server_filename(clients[client_index], server, os.path.basename(filepath), document, keywords)
+            upload_storage_server_filename(clients[client_index], server, os.path.basename(filepath), document,
+                                           keywords)
             window['success'].update("Uploaded succesfully")
 
+    window.close()
+
+
+def show_server():
+    def extract_client_docs(client: Client):
+        if client.id not in server._storage:
+            return []
+
+        return [AES.decrypt(d.encrypted_title, client._keys.encryption_key, d.title_iv, d.title_tag).decode()
+                for d in server._storage[client.id]]
+
+    layout = [
+        [sg.Text("This view is normally not possible since it requires knowing a client's key", text_color='darkRed')],
+        [sg.Text("Client 1's files")],
+        [sg.Listbox(extract_client_docs(clients[0]))],
+        [sg.Text("Client 2's files")],
+        [],
+        [sg.Text("Client 3's files")],
+        [],
+        [sg.Button('Back')]]
+    window = sg.Window("Storage Server", layout)
+
+    event, _ = window.read()
     window.close()
 
 
@@ -90,5 +115,7 @@ while True:
 
     if user.startswith('client'):
         show_client(user)
-    else:
+    elif user == 'consultant':
         show_consultant()
+    else:
+        show_server()

@@ -31,11 +31,11 @@ def upload_storage_server_bytes(client: Client, storage_server: StorageServer, d
 
 def upload_storage_server_filename(client: Client, storage_server: StorageServer, title: str, document: str, keywords: Set[str]):
     # Encrypt the document
-    encrypted_document = client.encrypt_data(document.encode(), [keyword.encode() for keyword in keywords])
-    encrypted_document.encrypted_title = AES.encrypt(title.encode(), client._keys.encryption_key)
+    enc = client.encrypt_data(document.encode(), [keyword.encode() for keyword in keywords])
+    enc.encrypted_title, enc.title_iv, enc.title_tag = AES.encrypt(title.encode(), client._keys.encryption_key)
 
     # Upload to the storage server
-    storage_server.upload_document(encrypted_document, client.id)
+    storage_server.upload_document(enc, client.id)
 
 
 def tests():

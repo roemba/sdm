@@ -29,11 +29,14 @@ class Keys:
 
 class EncryptedDocument:
     def __init__(self, ciphertext: bytes, encrypted_keywords: List[bytes], iv: bytes, auth_tag: bytes):
-        self.encrypted_title = None
         self.ciphertext = ciphertext
         self.encrypted_keywords = frozenset(encrypted_keywords)
         self.iv = iv
         self.auth_tag = auth_tag
+
+        self.encrypted_title = None
+        self.title_iv = None
+        self.title_tag = None
 
     def __sizeof__(self):
         return sys.getsizeof(self.ciphertext) +\

@@ -11,8 +11,7 @@ class Client:
         Should call user key setup to create a key pair of the user
         """
         self._id = uuid4()
-        self._keys = None
-        self._iv = None
+        self._keys: Keys = None
 
     @property
     def id(self):
