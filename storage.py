@@ -36,3 +36,11 @@ class StorageServer:
 
     def keyword_filename_search(self, trapdoor_q: bytes, client_id: UUID) -> List[bytes]:
         return [document.encrypted_title for document in self._storage[client_id] if trapdoor_q in document.encrypted_keywords]
+
+    def conjunctive_keyword_search(self, trapdoors: List[bytes], client_id: UUID) -> List[EncryptedDocument]:
+        return [document for document in self._storage[client_id] if
+                all([trapdoor in document.encrypted_keywords for trapdoor in trapdoors])]
+
+    def conjunctive_keyword_filename_search(self, trapdoors: List[bytes], client_id: UUID) -> List[EncryptedDocument]:
+        return [document.encrypted_title for document in self._storage[client_id] if
+                all([trapdoor in document.encrypted_keywords for trapdoor in trapdoors])]
