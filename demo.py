@@ -91,11 +91,11 @@ def show_server():
     layout = [
         [sg.Text("This view is normally not possible since it requires knowing a client's key", text_color='darkRed')],
         [sg.Text("Client 1's files")],
-        [sg.Listbox(extract_client_docs(clients[0]))],
+        [sg.Listbox(extract_client_docs(clients[0]), size=(35, 5))],
         [sg.Text("Client 2's files")],
-        [],
+        [sg.Listbox(extract_client_docs(clients[1]), size=(35, 5))],
         [sg.Text("Client 3's files")],
-        [],
+        [sg.Listbox(extract_client_docs(clients[2]), size=(35, 5))],
         [sg.Button('Back')]]
     window = sg.Window("Storage Server", layout)
 
