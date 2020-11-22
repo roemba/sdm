@@ -1,10 +1,11 @@
-from typing import List
+from typing import List, Iterable, Set
 
 from petlib.bn import Bn
 from petlib.cipher import Cipher
 
 from client import Client
 from consultant import Consultant
+from models import AES
 from storage import StorageServer
 
 
@@ -23,6 +24,15 @@ def upload_storage_server(client: Client, storage_server: StorageServer, documen
 def upload_storage_server_bytes(client: Client, storage_server: StorageServer, document: bytes, keywords: List[bytes]):
     # Encrypt the document
     encrypted_document = client.encrypt_data(document, keywords)
+
+    # Upload to the storage server
+    storage_server.upload_document(encrypted_document, client.id)
+
+
+def upload_storage_server_filename(client: Client, storage_server: StorageServer, title: str, document: str, keywords: Set[str]):
+    # Encrypt the document
+    encrypted_document = client.encrypt_data(document.encode(), [keyword.encode() for keyword in keywords])
+    encrypted_document.encrypted_title = AES.encrypt(title.encode(), client._keys.encryption_key)
 
     # Upload to the storage server
     storage_server.upload_document(encrypted_document, client.id)
