@@ -5,7 +5,7 @@ import PySimpleGUI as sg
 from client import Client
 from consultant import Consultant
 from models import AES
-from protocols import setup, upload_storage_server, upload_storage_server_filename
+from protocols import setup, upload_storage_server, upload_storage_server_filename, search_storage_server_filenames
 from storage import StorageServer
 
 sg.theme('Dark Blue 3')  # please make your windows colorful
@@ -39,14 +39,24 @@ def show_client(key: str):
     client_index = int(key[6]) - 1
 
     # Create window
-    layout = [[sg.Text('Upload a document')],
+    layout = [[sg.Text('User actions', font='bold')],
+              [sg.HorizontalSeparator()],
+              [sg.Text('Upload a document')],
               [sg.Input(size=(50, 1), key='input', enable_events=True), sg.FileBrowse()],
               [sg.Text('Keywords: '), sg.Text(size=(80, 1), key='keywords')],
               [sg.Button('Upload', key='upload'), sg.Text(size=(20, 1), key='success')],
+              [sg.HorizontalSeparator()],
+              [sg.Text('Search for documents')],
+              [sg.Input(size=(50, 1), key='search_string'), sg.Button('Search', key='search')],
+              [sg.Text('Results:')],
+              [sg.Listbox([], size=(50, 5), key='results')],
+              [sg.Button('Download', key='download', disabled=True)],
+              [sg.HorizontalSeparator()],
               [sg.Button('Back')]]
     window = sg.Window(client_text, layout)
 
     ready = False
+    results = []
 
     while True:
         event, values = window.read()
@@ -76,6 +86,11 @@ def show_client(key: str):
             upload_storage_server_filename(clients[client_index], server, os.path.basename(filepath), document,
                                            keywords)
             window['success'].update("Uploaded succesfully")
+
+        elif event == 'search':
+            keywords = {kw.lower() for kw in values['search_string'].split()}
+            results = search_storage_server_filenames(clients[client_index], server, keywords)
+            window['results'].update([title for title, _ in results])
 
     window.close()
 

@@ -1,4 +1,4 @@
-from typing import List, Iterable, Set
+from typing import List, Iterable, Set, Tuple
 
 from petlib.bn import Bn
 from petlib.cipher import Cipher
@@ -36,6 +36,18 @@ def upload_storage_server_filename(client: Client, storage_server: StorageServer
 
     # Upload to the storage server
     storage_server.upload_document(enc, client.id)
+
+
+def search_storage_server_filenames(client: Client, storage_server: StorageServer, keywords: Set[str]) -> List[Tuple[str, bytes]]:
+    trapdoors = [client.create_trapdoor_q(kw.encode()) for kw in keywords]
+    encrypted_titles = storage_server.conjunctive_keyword_filename_search(trapdoors, client.id)
+
+    results = []
+    for encrypted_title, iv, tag in encrypted_titles:
+        title = AES.decrypt(encrypted_title, client._keys.encryption_key, iv, tag).decode()
+        results.append((title, encrypted_title))
+
+    return results
 
 
 def tests():

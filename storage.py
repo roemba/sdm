@@ -1,5 +1,5 @@
 import sys
-from typing import Dict, List
+from typing import Dict, List, Tuple
 from uuid import UUID
 
 from models import EncryptedDocument
@@ -32,15 +32,28 @@ class StorageServer:
                 return document
 
     def keyword_search(self, trapdoor_q: bytes, client_id: UUID) -> List[EncryptedDocument]:
+        if client_id not in self._storage:
+            return []
+
         return [document for document in self._storage[client_id] if trapdoor_q in document.encrypted_keywords]
 
-    def keyword_filename_search(self, trapdoor_q: bytes, client_id: UUID) -> List[bytes]:
-        return [document.encrypted_title for document in self._storage[client_id] if trapdoor_q in document.encrypted_keywords]
+    def keyword_filename_search(self, trapdoor_q: bytes, client_id: UUID) -> List[Tuple[bytes, bytes, bytes]]:
+        if client_id not in self._storage:
+            return []
+
+        return [(doc.encrypted_title, doc.title_iv, doc.title_tag) for doc in self._storage[client_id]
+                if trapdoor_q in doc.encrypted_keywords]
 
     def conjunctive_keyword_search(self, trapdoors: List[bytes], client_id: UUID) -> List[EncryptedDocument]:
-        return [document for document in self._storage[client_id] if
-                all([trapdoor in document.encrypted_keywords for trapdoor in trapdoors])]
+        if client_id not in self._storage:
+            return []
 
-    def conjunctive_keyword_filename_search(self, trapdoors: List[bytes], client_id: UUID) -> List[EncryptedDocument]:
-        return [document.encrypted_title for document in self._storage[client_id] if
-                all([trapdoor in document.encrypted_keywords for trapdoor in trapdoors])]
+        return [document for document in self._storage[client_id]
+                if all([trapdoor in document.encrypted_keywords for trapdoor in trapdoors])]
+
+    def conjunctive_keyword_filename_search(self, trapdoors: List[bytes], client_id: UUID) -> List[Tuple[bytes, bytes, bytes]]:
+        if client_id not in self._storage:
+            return []
+
+        return [(doc.encrypted_title, doc.title_iv, doc.title_tag) for doc in self._storage[client_id]
+                if all([trapdoor in doc.encrypted_keywords for trapdoor in trapdoors])]
