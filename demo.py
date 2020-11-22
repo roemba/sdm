@@ -49,13 +49,14 @@ def show_client(key: str):
               [sg.Text('Search for documents')],
               [sg.Input(size=(50, 1), key='search_string'), sg.Button('Search', key='search')],
               [sg.Text('Results:')],
-              [sg.Listbox([], size=(50, 5), key='results')],
+              [sg.Listbox([], size=(50, 5), key='results', enable_events=True)],
               [sg.Button('Download', key='download', disabled=True)],
               [sg.HorizontalSeparator()],
               [sg.Button('Back')]]
     window = sg.Window(client_text, layout)
 
-    ready = False
+    can_upload = False
+    can_download = False
     results = []
 
     while True:
@@ -71,19 +72,19 @@ def show_client(key: str):
                 # Do nothing if this file does not exist
                 continue
 
-            ready = True
+            can_upload = True
 
             with open(values['input']) as file:
-                document = file.read()
-                keywords = {word.lower() for word in document.split()}
+                doc = file.read()
+                keywords = {word.lower() for word in doc.split()}
                 window['keywords'].update(keywords)
 
         elif event == 'upload':
-            if not ready:
+            if not can_upload:
                 window['success'].update("Not ready to upload")
                 continue
 
-            upload_storage_server_filename(clients[client_index], server, os.path.basename(filepath), document,
+            upload_storage_server_filename(clients[client_index], server, os.path.basename(filepath), doc,
                                            keywords)
             window['success'].update("Uploaded succesfully")
 
@@ -91,6 +92,36 @@ def show_client(key: str):
             keywords = {kw.lower() for kw in values['search_string'].split()}
             results = search_storage_server_filenames(clients[client_index], server, keywords)
             window['results'].update([title for title, _ in results])
+
+            can_download = False
+            window['download'].update(disabled=True)
+
+        elif event == 'results':
+            if len(values['results']) > 0:
+                can_download = True
+                window['download'].update(disabled=False)
+            else:
+                can_download = False
+                window['download'].update(disabled=True)
+
+        elif event == 'download':
+            if not can_download:
+                continue
+
+            encrypted_title = None
+            for title, enc_title in results:
+                if title == window['results'][0]:
+                    encrypted_title = enc_title
+                    break
+
+            doc = server.download_document(encrypted_title, clients[client_index].id)
+
+            key = clients[client_index]._keys.encryption_key
+            doc_title = AES.decrypt(doc.encrypted_title, key, doc.title_iv, doc.title_tag).decode()
+            doc_contents = AES.decrypt(doc.ciphertext, key, doc.iv, doc.auth_tag).decode()
+
+            with open(f"DOWNLOADED-{doc_title}", mode='w') as file:
+                file.write(doc_contents)
 
     window.close()
 
