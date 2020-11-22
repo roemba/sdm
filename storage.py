@@ -26,5 +26,13 @@ class StorageServer:
 
         self._storage[client_id].append(document)
 
-    def keyword_search(self, trapdoor_q: bytes, client_id: UUID):
+    def download_document(self, encrypted_title: bytes, client_id: UUID) -> EncryptedDocument:
+        for document in self._storage[client_id]:
+            if document.encrypted_title == encrypted_title:
+                return document
+
+    def keyword_search(self, trapdoor_q: bytes, client_id: UUID) -> List[EncryptedDocument]:
         return [document for document in self._storage[client_id] if trapdoor_q in document.encrypted_keywords]
+
+    def keyword_filename_search(self, trapdoor_q: bytes, client_id: UUID) -> List[bytes]:
+        return [document.encrypted_title for document in self._storage[client_id] if trapdoor_q in document.encrypted_keywords]

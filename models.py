@@ -29,6 +29,7 @@ class Keys:
 
 class EncryptedDocument:
     def __init__(self, ciphertext: bytes, encrypted_keywords: List[bytes], iv: bytes, auth_tag: bytes):
+        self.encrypted_title = None
         self.ciphertext = ciphertext
         self.encrypted_keywords = frozenset(encrypted_keywords)
         self.iv = iv
