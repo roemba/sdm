@@ -87,6 +87,8 @@ def show_client(key: str):
             upload_storage_server_filename(clients[client_index], server, os.path.basename(filepath), doc,
                                            keywords)
             window['success'].update("Uploaded succesfully")
+            window['keywords'].update("")
+            window['input'].update("")
 
         elif event == 'search':
             keywords = {kw.lower() for kw in values['search_string'].split()}
@@ -110,7 +112,7 @@ def show_client(key: str):
 
             encrypted_title = None
             for title, enc_title in results:
-                if title == window['results'][0]:
+                if title == values['results'][0]:
                     encrypted_title = enc_title
                     break
 
@@ -120,8 +122,11 @@ def show_client(key: str):
             doc_title = AES.decrypt(doc.encrypted_title, key, doc.title_iv, doc.title_tag).decode()
             doc_contents = AES.decrypt(doc.ciphertext, key, doc.iv, doc.auth_tag).decode()
 
-            with open(f"DOWNLOADED-{doc_title}", mode='w') as file:
+            with open(f"DWNLD-{doc_title}", mode='w') as file:
                 file.write(doc_contents)
+
+            can_download = False
+            window['download'].update(disabled=True)
 
     window.close()
 
