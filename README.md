@@ -16,7 +16,10 @@ The following packages are necessary to install `petlib`.
 ## Structure
 The methods are logically divided over `client.py`, `consultant.py` and `storage.py`.
 Common cryptographic functions and data representations are in `models.py`.
-Finally, protocols for setup, uploading and searching are in `protocols.py`
+Finally, protocols for setup, uploading and searching are in `protocols.py`.
+
+## Experiments
+The file `experiments.py` contains some runtime, bandwidth and storage experiments.
 
 ## Demonstration
 The file `demo.py` is a Python script that starts a Graphical User Interface to play around with the implementation.
