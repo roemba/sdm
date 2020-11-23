@@ -22,7 +22,8 @@ Finally, protocols for setup, uploading and searching are in `protocols.py`.
 The file `experiments.py` contains some runtime, bandwidth and storage experiments.
 
 ## Demonstration
-The file `demo.py` is a Python script that starts a Graphical User Interface to play around with the implementation.
+The file `demo.py` is a Python script that starts a Graphical User Interface to play around with the implementation. In order to run the demo it is necessary to install `PySimpleGUI`.
+
 In the `/examples` folder there are some simple text files that can be used for this purpose.
 It is important to note that keywords are now extracted automatically from the files, but of course for an image file it
 would make more sense to insert custom keywords.
