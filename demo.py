@@ -75,7 +75,9 @@ def show_client(key: str):
             with open(values['input']) as file:
                 doc = file.read()
                 keywords = {word.lower() for word in doc.split()}
-                window['keywords'].update(keywords)
+                window['keywords'].update(", ".join(keywords))
+
+            window['success'].update("")
 
         elif event == 'upload':
             if not can_upload:
