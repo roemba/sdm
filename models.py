@@ -6,7 +6,9 @@ from hashlib import sha256
 
 from petlib.cipher import Cipher
 
-
+"""
+AES methods of encryption and decryption
+"""
 class AES:
     @staticmethod
     def encrypt(plaintext: bytes, key: bytes) -> (bytes, bytes):
@@ -20,13 +22,17 @@ class AES:
     def decrypt(ciphertext: bytes, key: bytes, iv: bytes, auth_tag: bytes) -> bytes:
         return Cipher.aes_256_gcm().quick_gcm_dec(key, iv, ciphertext, auth_tag)
 
-
+"""
+Helper function for key generation
+"""
 class Keys:
     def __init__(self):
         self.encryption_key = urandom(32)
         self.hashing_key = urandom(32)
 
-
+"""
+Information stored about an encrypted documentt
+"""
 class EncryptedDocument:
     def __init__(self, ciphertext: bytes, encrypted_keywords: List[bytes], iv: bytes, auth_tag: bytes):
         self.ciphertext = ciphertext
@@ -45,6 +51,9 @@ class EncryptedDocument:
                sys.getsizeof(self.auth_tag)
 
 
+"""
+Wrapper functions for encryption
+"""
 class CryptoFunctions:
     @staticmethod
     def encrypt_data(plaintext: bytes, search_keywords: List[bytes], keys: Keys) -> EncryptedDocument:

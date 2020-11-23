@@ -8,7 +8,9 @@ from consultant import Consultant
 from models import AES
 from storage import StorageServer
 
-
+"""
+Method testing
+"""
 def setup(consultant: Consultant, clients: List[Client]):
     # Setup the system for the clients
     for client in clients:
