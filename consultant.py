@@ -3,15 +3,16 @@ from uuid import UUID
 
 from models import Keys, EncryptedDocument, CryptoFunctions
 
-
+"""
+This is the trusted party (consultant) in the protocol, setting up and managing all the keys.
+"""
 class Consultant:
-    """
-    This is the trusted party (consultant) in the protocol, setting up and managing all the keys.
-    """
-
     def __init__(self):
         self._client_keys: Dict[UUID, Keys] = {}
 
+    """
+    For each client , generate a key pair
+    """
     def generate_client_keys(self, client) -> (Keys, UUID):
         client_keys = Keys()
         
@@ -22,6 +23,9 @@ class Consultant:
 
         return client_keys
 
+    """
+    Functions necessary to enable the consultant to search the documents
+    """
     def encrypt_data(self, plaintext: bytes, search_keywords: List[bytes], client_id: UUID) -> EncryptedDocument:
         return CryptoFunctions.encrypt_data(plaintext, search_keywords, self._client_keys[client_id])
 
