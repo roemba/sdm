@@ -8,15 +8,20 @@ from consultant import Consultant
 from models import AES
 from storage import StorageServer
 
-"""
-Method testing
-"""
+
 def setup(consultant: Consultant, clients: List[Client]):
     # Setup the system for the clients
     for client in clients:
         # Add client
         client_keys = consultant.generate_client_keys(client)
         client.assign_keys(client_keys)
+
+
+def setup_diffie_helman(consultant: Consultant, clients: List[Client]):
+    # Setup the system for the clients
+    for client in clients:
+        # Add client
+        consultant.exchange_client_keys(client)
 
 
 def upload_storage_server(client: Client, storage_server: StorageServer, document: str, keywords: List[str]):

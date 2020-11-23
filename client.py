@@ -1,5 +1,8 @@
-from typing import List
+from hashlib import sha256
+from typing import List, Tuple
 from uuid import uuid4
+
+from petlib.ec import EcGroup, EcPt
 
 from models import EncryptedDocument, Keys, CryptoFunctions
 
@@ -20,6 +23,22 @@ class Client:
 
     def assign_keys(self, keys: Keys):
         self._keys = keys
+
+    def exchange_keys(self, A1: EcPt, A2: EcPt) -> Tuple[EcPt, EcPt]:
+        curve = EcGroup(713)
+        g = curve.generator()
+
+        b1 = curve.order().random()
+        B1 = g.pt_mul(b1)
+
+        b2 = curve.order().random()
+        B2 = g.pt_mul(b2)
+
+        self._keys = Keys()
+        self._keys.encryption_key = sha256(A1.pt_mul(b1).export()).digest()
+        self._keys.hashing_key = sha256(A2.pt_mul(b2).export()).digest()
+
+        return B1, B2
 
     """
     Input: a document and a list of relevant keywords

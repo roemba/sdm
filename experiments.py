@@ -7,7 +7,7 @@ from typing import List
 
 from client import Client
 from consultant import Consultant
-from protocols import setup, upload_storage_server_bytes
+from protocols import setup, upload_storage_server_bytes, setup_diffie_helman
 from storage import StorageServer
 
 
@@ -29,8 +29,8 @@ class SystemSetup:
 
 def evaluate_setup_runtime():
     experiment_count = 100
-    run_count = 100
-    client_counts = [5, 10, 15, 20, 25, 30, 45, 50]
+    run_count = 1
+    client_counts = [5, 10, 15, 20, 25]
     print(f"Evaluate setup runtime for client counts {client_counts}, performing {experiment_count} experiments of "
           f"{run_count} runs.")
 
@@ -48,7 +48,7 @@ def evaluate_setup_runtime():
             start = time.monotonic()
 
             for run_data in experiment_data:
-                setup(run_data.consultant, run_data.clients)
+                setup_diffie_helman(run_data.consultant, run_data.clients)
 
             runtime = (time.monotonic() - start) / run_count * 1000
             experiment_runtimes.append(runtime)
@@ -224,13 +224,13 @@ def evaluate_storage_single_user():
 
 
 if __name__ == '__main__':
-    # print("> Warm-up run")
-    # evaluate_setup_runtime()
-    #
-    # print("> Actual evaluation")
-    #
-    # print("|Setup|")
-    # evaluate_setup_runtime()
+    print("> Warm-up run")
+    evaluate_setup_runtime()
+
+    print("> Actual evaluation")
+
+    print("|Setup|")
+    evaluate_setup_runtime()
     #
     # print("|Upload|")
     # evaluate_upload_runtime()
@@ -241,4 +241,4 @@ if __name__ == '__main__':
     #evaluate_upload_bandwidth()
     #evaluate_search_bandwidth()
 
-    evaluate_storage_single_user()
+    #evaluate_storage_single_user()
